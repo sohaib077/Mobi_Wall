@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobi_wall/core/helpers/extensions.dart';
-// import 'package:mobiwall/features/parent/data/models/child_data_model.dart';
+// import 'package:mobi_wall/features/parent/data/models/child_data_model.dart';
 
 abstract class Constants {
   /// Values
@@ -22,7 +22,7 @@ abstract class Constants {
 
   static late bool otp;
   static late bool permissions;
-  static late bool iconHided;
+  static late bool iconHiden;
   static late bool isParent;
 
   static String? id;

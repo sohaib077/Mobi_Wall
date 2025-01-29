@@ -1,3 +1,1 @@
-enum AlertState{
-  success , failed , warning
-}
+enum AlertState { success, failed, warning }
