@@ -5,6 +5,7 @@ import 'package:mobi_wall/core/utils/app_colors.dart';
 import 'package:mobi_wall/core/utils/constants.dart';
 import 'package:mobi_wall/core/utils/size_config.dart';
 import 'package:mobi_wall/core/widgets/custom_logo.dart';
+import 'package:mobi_wall/features/auth/presentation/views/auth_view.dart';
 import '../../../onboarding/presentation/views/onboarding_view.dart';
 import 'widgets/splash_loading_progress.dart';
 
@@ -50,7 +51,7 @@ class _SplashViewState extends State<SplashView> with TickerProviderStateMixin {
               Constants.onboarding
                   ? navigateAndFinish(context, const OnboardingView(),
                       fade: true)
-                  : navigateAndFinish(context, const OnboardingView(), fade: true);
+                  : navigateAndFinish(context, const AuthView(), fade: true);
             }
           });
         });

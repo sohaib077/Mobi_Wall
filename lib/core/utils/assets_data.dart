@@ -13,7 +13,7 @@ abstract class AssetsData {
   static const addressLottie = 'assets/lotties/addressLottie.json';
   static const childLottie = 'assets/lotties/childLottie.json';
   static const parentChildLottie = 'assets/lotties/parentChildLottie.json';
-
+  static const threeLoadingDotsLottie = "assets/lotties/threeLoadingDots.json";
 
 
   // Images

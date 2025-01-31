@@ -13,7 +13,7 @@ Future<void> setupCacheHelper() async {
   Constants.otp = CacheHelper.getData(Constants.cachedOtp) ?? true;
   Constants.permissions =
       CacheHelper.getData(Constants.cachedPermissions) ?? true;
-  Constants.iconHiden = CacheHelper.getData(Constants.cachedIconHided) ?? false;
+  Constants.iconHided = CacheHelper.getData(Constants.cachedIconHided) ?? false;
   Constants.isParent = CacheHelper.getData(Constants.cachedIsParent) ?? false;
 
   /// uncomment

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:mobi_wall/core/helpers/extensions.dart';
+import '../utils/assets_data.dart';
+import '../utils/size_config.dart';
 import '../utils/styles.dart';
 
-class CustomElevatedButton extends StatelessWidget {
+class CustomElevatedButton extends StatefulWidget {
   const CustomElevatedButton({
     super.key,
     this.onPressed,
@@ -10,6 +13,7 @@ class CustomElevatedButton extends StatelessWidget {
     this.color,
     this.verticalPadding,
     this.overlayColor,
+    this.loading = false,
   });
 
   final void Function()? onPressed;
@@ -17,27 +21,49 @@ class CustomElevatedButton extends StatelessWidget {
   final Color? color;
   final Color? overlayColor;
   final double? verticalPadding;
+  final bool loading;
+
+  @override
+  State<CustomElevatedButton> createState() => _CustomElevatedButtonState();
+}
+
+class _CustomElevatedButtonState extends State<CustomElevatedButton> {
+  bool showLoading = false;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
+    final double width =
+        widget.loading ? SizeConfig.screenWidth * .3 : SizeConfig.screenWidth;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.easeInOut,
+      onEnd: () => setState(() => showLoading = !showLoading),
+      width: width,
       child: ElevatedButton(
-        onPressed: onPressed,
-        style:
-            Styles.customButtonStyle(color: color, overlayColor: overlayColor),
+        onPressed: widget.onPressed,
+        style: Styles.customButtonStyle(
+            color: widget.color, overlayColor: widget.overlayColor),
         child: Padding(
-          padding: EdgeInsets.symmetric(vertical: verticalPadding ?? 18.res(context)),
-          child: FittedBox(
-            child: Text(
-              text,
-              style: Styles.medium25Style(context, size: 14).copyWith(
-                color: Colors.white,
-              ),
-            ),
-          ),
+          padding: EdgeInsets.symmetric(
+              vertical: widget.verticalPadding ?? 18.res(context)),
+          child: (showLoading && widget.loading)
+              ? loadingWidget()
+              : FittedBox(
+                  child: Text(
+                    widget.text,
+                    style: Styles.medium25Style(context, size: 14).copyWith(
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
         ),
       ),
     );
+  }
+
+  Widget loadingWidget() {
+    return Lottie.asset(AssetsData.threeLoadingDotsLottie,
+        width: double.infinity, height:20.res(context));
   }
 }

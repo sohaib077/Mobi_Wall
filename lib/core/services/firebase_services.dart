@@ -1,14 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:mobi_wall/features/auth/data/models/user_data_model.dart';
 
 import '../utils/constants.dart';
 
-abstract class FirebaseServices {
+class FirebaseService {
   static final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   static final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  static Future<void> signOut() => _auth.signOut();
+  Future<void> signOut() => _auth.signOut();
 
   /// ///////////////////////     COLLECTION NAMES      ///////////////////////////////
 
@@ -17,7 +18,7 @@ abstract class FirebaseServices {
   static const String _appsCollection = "apps";
 
   /// ///////////////////////     AUTH      ///////////////////////////////
-  static Future<UserCredential> registerUser({
+  Future<UserCredential> registerUser({
     required String email,
     required String password,
   }) async {
@@ -27,7 +28,7 @@ abstract class FirebaseServices {
     );
   }
 
-  static Future<UserCredential> loginUser({
+  Future<UserCredential> loginUser({
     required String email,
     required String password,
   }) async {
@@ -38,20 +39,20 @@ abstract class FirebaseServices {
   }
 
   /// ///////////////////////     USER DATA      ///////////////////////////////
+
+  Future<void> setUserData({required UserDataModel userData}) async {
+    return await _db
+        .collection(_usersCollection)
+        .doc(userData.id)
+        .set(userData.toMap());
+  }
+
+  Future<DocumentSnapshot<Map<String, dynamic>>> getUserData(
+      {required String id}) async {
+    return await _db.collection(_usersCollection).doc(id).get();
+  }
   //
-  // static Future<void> setUserData({required UserDataModel userData}) async {
-  //   return await _db
-  //       .collection(_usersCollection)
-  //       .doc(userData.id)
-  //       .set(userData.toMap());
-  // }
-  //
-  // static Future<DocumentSnapshot<Map<String, dynamic>>> getUserData(
-  //     {required String id}) async {
-  //   return await _db.collection(_usersCollection).doc(id).get();
-  // }
-  //
-  // static Future<String?> updateUserToken() async {
+  // Future<String?> updateUserToken() async {
   //   String? token = await Constants.getToken();
   //
   //   if (token != null) {
@@ -70,7 +71,7 @@ abstract class FirebaseServices {
   //     .doc(Constants.userData.id)
   //     .collection(_childrenCollection);
   //
-  // static Future<void> setChildData({
+  // Future<void> setChildData({
   //   required ChildDataModel childData,
   // }) async {
   //   await _db
@@ -92,15 +93,15 @@ abstract class FirebaseServices {
   //       .set(childData.toMap());
   // }
   //
-  // static Future<QuerySnapshot<Map<String, dynamic>>> getChildren() async {
+  // Future<QuerySnapshot<Map<String, dynamic>>> getChildren() async {
   //   return await _childRF.get();
   // }
   //
-  // static Future<void> deleteChild({required String username}) async {
+  // Future<void> deleteChild({required String username}) async {
   //   return await _childRF.doc(username).delete();
   // }
   //
-  // static Future<DocumentSnapshot<Map<String, dynamic>>> loginChild(
+  // Future<DocumentSnapshot<Map<String, dynamic>>> loginChild(
   //     {required String username}) async {
   //   await _childRF.doc(username).get().then((value) {
   //     if (!value.exists) throw ("\nWrong username\n");
@@ -114,7 +115,7 @@ abstract class FirebaseServices {
   //       .get();
   // }
   //
-  // static Future<String?> updateChildToken() async {
+  // Future<String?> updateChildToken() async {
   //   String? token = await Constants.getToken();
   //
   //   if (token != null) {
@@ -136,19 +137,19 @@ abstract class FirebaseServices {
   //     .collection(_childrenCollection)
   //     .doc(Constants.childData!.username);
   //
-  // static Future<void> refreshAppsData({
+  // Future<void> refreshAppsData({
   //   required List<Map<String, dynamic>> apps,
   // }) async {
   //   await _appsDocRef.update({'apps': apps, 'updatedDate': DateTime.now()});
   // }
   //
-  // static Future<void> refreshLocationData({
+  // Future<void> refreshLocationData({
   //   required LocationDataModel location,
   // }) async {
   //   await _appsDocRef.update({'location': location.toMap()});
   // }
   //
-  // static Future<void> updateBlockedApps({
+  // Future<void> updateBlockedApps({
   //   required List<String> blockedApps,
   //   required String childUsername,
   // }) async {
@@ -160,7 +161,7 @@ abstract class FirebaseServices {
   //       .update({'blockedApps': blockedApps});
   // }
   //
-  // static Future<void> updateBlockedUrls({
+  // Future<void> updateBlockedUrls({
   //   required List<String> blockedUrls,
   //   required String childUsername,
   // }) async {

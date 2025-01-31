@@ -93,10 +93,14 @@ class LogOutButton extends StatelessWidget {
                             CacheHelper.removeData(Constants.cachedOtp);
                             CacheHelper.removeData(Constants.cachedChild);
                             Constants.otp = true;
-                          /// uncomment  Constants.childData = null;
+
+                            /// uncomment
+                            /*
+                            Constants.childData = null;
                             FirebaseServices.signOut();
-                          /// uncomment BackgroundServices.stopPeriodicTasks(context);
-                          /// uncomment navigateAndFinish(context, const AuthView(),fade: true);
+                           BackgroundServices.stopPeriodicTasks(context);
+                           navigateAndFinish(context, const AuthView(),fade: true);
+                             */
                           },
                           child: Text(
                             'Logout',

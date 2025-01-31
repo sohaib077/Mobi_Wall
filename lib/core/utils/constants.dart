@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobi_wall/core/helpers/extensions.dart';
+import 'package:mobi_wall/features/auth/data/models/user_data_model.dart';
 // import 'package:mobi_wall/features/parent/data/models/child_data_model.dart';
 
 abstract class Constants {
@@ -10,6 +11,7 @@ abstract class Constants {
 
   static const String cachedOnboarding = 'onboarding';
   static const String cachedId = 'id';
+  static const String cachedUser = 'id';
   static const String cachedOtp = 'otp';
   static const String cachedChild = 'child';
   static const String cachedPermissions = 'permissions';
@@ -22,12 +24,12 @@ abstract class Constants {
 
   static late bool otp;
   static late bool permissions;
-  static late bool iconHiden;
+  static late bool iconHided;
   static late bool isParent;
 
   static String? id;
 
-  // static late UserDataModel userData;
+  static late UserDataModel userData;
 
   //This is  the device token which used in FCM
   // static Future<String?> getToken() async {
@@ -40,4 +42,9 @@ abstract class Constants {
         topLeft: Radius.circular(15),
         topRight: Radius.circular(15),
       ));
+
+static const String unknownError =
+      'Oops There was an Error, Please try again';
+
 }
+

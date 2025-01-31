@@ -40,9 +40,7 @@ class CustomLogOutButton extends StatelessWidget {
                         color: Colors.red,
                         size: 45.res(context),
                       ),
-                      SizedBox(
-                        height: 10.res(context)
-                      ),
+                      SizedBox(height: 10.res(context)),
                       FittedBox(
                         child: Text(
                           'Wanna logout !',
@@ -97,7 +95,7 @@ class CustomLogOutButton extends StatelessWidget {
                                 return PasswordBottomSheet(
                                     actionTitle: "L O G O U T",
                                     action: () {
-                                    /// uncomment  BackgroundServices.stopPeriodicTasks(context);
+                                      /// uncomment  BackgroundServices.stopPeriodicTasks(context);
                                       logout(context);
                                     });
                               },
@@ -132,8 +130,12 @@ class CustomLogOutButton extends StatelessWidget {
     CacheHelper.removeData(Constants.cachedOtp);
     CacheHelper.removeData(Constants.cachedChild);
     Constants.otp = true;
-   /// uncomment  Constants.childData = null;
-    FirebaseServices.signOut();
-   /// uncomment navigateAndFinish(context, const AuthView(), fade: true);
+
+    /// uncomment
+    /*
+    Constants.childData = null;
+     FirebaseServices.signOut();
+    navigateAndFinish(context, const AuthView(), fade: true);
+    */
   }
 }

@@ -124,45 +124,30 @@ Shimmer shimmerLoadingContainer(
 
 Future<dynamic> showAlertDialog(
   BuildContext context, {
-  required AlertState state,
+  AlertState state = AlertState.failed,
   String? title,
   String? description,
   bool autoClose = false,
+  VoidCallback? onTap,
 }) {
   return showDialog(
     barrierColor: Colors.transparent,
     context: context,
+    barrierDismissible: false,
     builder: (context) {
-      return GestureDetector(
-        onTap: () {
-          if (autoClose == false) {
-            Navigator.pop(context);
-          }
-        },
-        child: Material(
-          color: Colors.transparent,
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                CustomToaster(
-                  state: state,
-                  title: title,
-                  description: description,
-                  autoClose: autoClose,
-                  // autoClose: state == AlertState.warning ? true : autoClose,
-                ),
-              ],
-            ),
-          ),
+      return Material(
+        color: Colors.transparent,
+        child: CustomToaster(
+          state: state,
+          title: title,
+          description: description,
+          autoClose: autoClose,
+          onTap: onTap,
         ),
       );
     },
   );
 }
-
 
 // ========================================================================================== //
 
