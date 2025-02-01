@@ -41,12 +41,8 @@ class _PasswordBottomSheetState extends State<PasswordBottomSheet> {
               hintText: "Enter child's password",
               validator: (String value) {
                 if (value.trim().isEmpty) return "Enter a valid password";
-
-                /// uncomment
-                /*
                 if (value != Constants.childData!.password)
                   return "Wrong password, try again";
-                  */
               },
               label: "Password",
             ),

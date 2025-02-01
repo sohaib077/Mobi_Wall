@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mobi_wall/core/utils/icon_broken.dart';
+import 'package:mobi_wall/features/auth/presentation/views/auth_view.dart';
 
 import '../functions/navigation.dart';
 import '../helpers/cache_helper.dart';
 import '../services/firebase_services.dart';
+import '../utils/background_services.dart';
 import '../utils/constants.dart';
+import 'shared_methods.dart';
 
 class LogOutButton extends StatelessWidget {
   const LogOutButton({
@@ -94,13 +97,11 @@ class LogOutButton extends StatelessWidget {
                             CacheHelper.removeData(Constants.cachedChild);
                             Constants.otp = true;
 
-                            /// uncomment
-                            /*
                             Constants.childData = null;
-                            FirebaseServices.signOut();
-                           BackgroundServices.stopPeriodicTasks(context);
-                           navigateAndFinish(context, const AuthView(),fade: true);
-                             */
+                            FirebaseService().signOut();
+                            BackgroundServices.stopPeriodicTasks(context);
+                            navigateAndFinish(context, const AuthView(),
+                                fade: true);
                           },
                           child: Text(
                             'Logout',

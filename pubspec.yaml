@@ -93,6 +93,15 @@ dependencies:
   percent_indicator: ^4.2.3
   url_launcher: ^6.2.6
 
+  # Apps Data
+  installed_apps: ^1.5.0
+#  app_usage: ^3.0.1
+
+  # Getting Location's latitude and longitude
+  geolocator: ^11.0.0
+
+  # Getting Location details from latitude and longitude
+  geocode: ^1.0.3
 
 dev_dependencies:
   flutter_test:

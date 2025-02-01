@@ -116,9 +116,8 @@ class _CustomToasterState extends State<CustomToaster>
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  if (widget.title != null)
                                     Text(
-                                      widget.title!,
+                                      widget.title ?? getTitle(),
                                       style:
                                           Styles.semiBold20Style(context, size: 14),
                                     ),

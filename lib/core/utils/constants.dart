@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:mobi_wall/core/helpers/extensions.dart';
 import 'package:mobi_wall/features/auth/data/models/user_data_model.dart';
 // import 'package:mobi_wall/features/parent/data/models/child_data_model.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:mobi_wall/features/parent/data/models/child_data_model.dart';
 
 abstract class Constants {
   /// Values
@@ -18,7 +20,7 @@ abstract class Constants {
   static const String cachedIconHided = 'iconHided';
   static const String cachedIsParent = 'isParent';
 
-  // static ChildDataModel? childData;
+  static ChildDataModel? childData;
 
   static late bool onboarding;
 
@@ -32,9 +34,9 @@ abstract class Constants {
   static late UserDataModel userData;
 
   //This is  the device token which used in FCM
-  // static Future<String?> getToken() async {
-  //   return await FirebaseMessaging.instance.getToken();
-  // }
+  static Future<String?> getToken() async {
+    return await FirebaseMessaging.instance.getToken();
+  }
 
   static RoundedRectangleBorder modalSheetDecoration() =>
       const RoundedRectangleBorder(

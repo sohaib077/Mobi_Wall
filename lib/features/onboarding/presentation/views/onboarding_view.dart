@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mobi_wall/core/functions/navigation.dart';
 import 'package:mobi_wall/core/helpers/cache_helper.dart';
 import 'package:mobi_wall/core/utils/constants.dart';
 import 'package:mobi_wall/core/utils/size_config.dart';
 import 'package:mobi_wall/core/widgets/custom_animated_button.dart';
+import 'package:mobi_wall/core/widgets/shared_methods.dart';
 import 'package:mobi_wall/features/auth/presentation/views/auth_view.dart';
 import 'package:mobi_wall/features/onboarding/presentation/manager/onboarding_cubit.dart';
 import 'package:mobi_wall/features/onboarding/presentation/views/widgets/custom_carousel_slider.dart';

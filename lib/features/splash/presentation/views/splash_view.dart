@@ -1,11 +1,18 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
-import 'package:mobi_wall/core/functions/navigation.dart';
 import 'package:mobi_wall/core/helpers/extensions.dart';
+import 'package:mobi_wall/core/services/firebase_services.dart';
 import 'package:mobi_wall/core/utils/app_colors.dart';
 import 'package:mobi_wall/core/utils/constants.dart';
 import 'package:mobi_wall/core/utils/size_config.dart';
 import 'package:mobi_wall/core/widgets/custom_logo.dart';
+import 'package:mobi_wall/core/widgets/shared_methods.dart';
+import 'package:mobi_wall/features/auth/data/models/user_data_model.dart';
 import 'package:mobi_wall/features/auth/presentation/views/auth_view.dart';
+import 'package:mobi_wall/features/children/presentation/views/children_view.dart';
+import 'package:mobi_wall/features/home/presentation/views/home_view.dart';
+import 'package:mobi_wall/features/parent/presentation/views/parent_children_view.dart';
 import '../../../onboarding/presentation/views/onboarding_view.dart';
 import 'widgets/splash_loading_progress.dart';
 
@@ -101,36 +108,38 @@ class _SplashViewState extends State<SplashView> with TickerProviderStateMixin {
   }
 
   Future<void> getUserData() async {
-    // await FirebaseServices.getUserData(id: Constants.id!).then((value) async {
-    //   Constants.userData = UserDataModel.fromJson(value.data()!);
-    //   setState(() {
-    //     progressWidth = 0;
-    //   });
-    //   await Future.delayed(const Duration(milliseconds: 1000), () {
-    //     if (Constants.childData != null) {
-    //       navigateAndFinish(context, const ChildrenView(), fade: true);
-    //     } else {
-    //       Constants.isParent
-    //           ? navigateAndFinish(context, const ParentChildrenView(),
-    //               fade: true)
-    //           : navigateAndFinish(context, const HomeView(), fade: true);
-    //     }
-    //   });
-    // }).catchError((error) async {
-    //   showAlertDialog(
-    //     context,
-    //     state: AlertState.failed,
-    //     description:
-    //         "Something went wrong, please check your network and try again",
-    //   );
-    //   setState(() {
-    //     progressWidth = 0;
-    //   });
-    //   await Future.delayed(const Duration(milliseconds: 1400), () {
-    //     setState(() {
-    //       errorState = true;
-    //     });
-    //   });
-    // });
+    await FirebaseService().getUserData(id: Constants.id!).then((value) async {
+      log('id = ${Constants.id}');
+      log('user = ${value.data().toString()}');
+      Constants.userData = UserDataModel.fromJson(value.data());
+      setState(() {
+        progressWidth = 0;
+      });
+      await Future.delayed(const Duration(milliseconds: 1000), () {
+        if (Constants.childData != null) {
+          navigateAndFinish(context, const ChildrenView(), fade: true);
+        } else {
+          Constants.isParent
+              ? navigateAndFinish(context, const ParentChildrenView(),
+                  fade: true)
+              : navigateAndFinish(context, const HomeView(), fade: true);
+        }
+      });
+    }).catchError((error) async {
+      log("error = $error");
+      showAlertDialog(
+        context,
+        description:
+            "Something went wrong, please check your network and try again",
+      );
+      setState(() {
+        progressWidth = 0;
+      });
+      await Future.delayed(const Duration(milliseconds: 1400), () {
+        setState(() {
+          errorState = true;
+        });
+      });
+    });
   }
 }

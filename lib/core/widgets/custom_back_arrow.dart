@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:mobi_wall/core/helpers/extensions.dart';
+import 'package:mobi_wall/features/home/presentation/views/home_view.dart';
 
 import '../functions/navigation.dart';
 import '../helpers/cache_helper.dart';
 import '../utils/constants.dart';
 import '../utils/icon_broken.dart';
 import '../utils/styles.dart';
+import 'shared_methods.dart';
 
 class CustomBackArrow extends StatelessWidget {
   const CustomBackArrow({
@@ -24,8 +26,7 @@ class CustomBackArrow extends StatelessWidget {
             onTap: () {
               if (backToHome) {
                 CacheHelper.removeData(Constants.cachedChild);
-
-                /// uncomment navigateAndFinish(context, const HomeView(), x: -1, y: 0);
+                navigateAndFinish(context, const HomeView(), x: -1, y: 0);
               } else {
                 Navigator.pop(context);
               }

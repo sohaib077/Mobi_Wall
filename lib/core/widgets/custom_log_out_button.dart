@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mobi_wall/core/helpers/extensions.dart';
 import 'package:mobi_wall/core/utils/constants.dart';
+import 'package:mobi_wall/features/auth/presentation/views/auth_view.dart';
 import '../helpers/cache_helper.dart';
 import '../services/firebase_services.dart';
+import '../utils/background_services.dart';
 import '../utils/icon_broken.dart';
 import 'password_bottom_sheet.dart';
+import 'shared_methods.dart';
 
 class CustomLogOutButton extends StatelessWidget {
   const CustomLogOutButton({
@@ -95,7 +98,8 @@ class CustomLogOutButton extends StatelessWidget {
                                 return PasswordBottomSheet(
                                     actionTitle: "L O G O U T",
                                     action: () {
-                                      /// uncomment  BackgroundServices.stopPeriodicTasks(context);
+                                      BackgroundServices.stopPeriodicTasks(
+                                          context);
                                       logout(context);
                                     });
                               },
@@ -130,12 +134,8 @@ class CustomLogOutButton extends StatelessWidget {
     CacheHelper.removeData(Constants.cachedOtp);
     CacheHelper.removeData(Constants.cachedChild);
     Constants.otp = true;
-
-    /// uncomment
-    /*
     Constants.childData = null;
-     FirebaseServices.signOut();
+    FirebaseService().signOut();
     navigateAndFinish(context, const AuthView(), fade: true);
-    */
   }
 }
