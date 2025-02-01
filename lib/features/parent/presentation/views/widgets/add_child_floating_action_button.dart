@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mobi_wall/core/functions/setup_service_locator.dart';
 import 'package:mobi_wall/core/utils/constants.dart';
 import 'package:mobi_wall/core/utils/app_colors.dart';
 import 'package:mobi_wall/core/utils/styles.dart';
+import 'package:mobi_wall/features/parent/presentation/manager/parent_cubit.dart';
 import 'package:mobi_wall/features/parent/presentation/views/widgets/add_child_bottom_sheet.dart';
 
 class AddChildFloatingActionButton extends StatelessWidget {
@@ -21,7 +24,10 @@ class AddChildFloatingActionButton extends StatelessWidget {
           isScrollControlled: true,
           context: context,
           builder: (context) {
-            return const AddChildBottomSheet();
+            return BlocProvider.value(
+              value: sl<ParentCubit>(),
+              child: const AddChildBottomSheet(),
+            );
           },
         );
       },

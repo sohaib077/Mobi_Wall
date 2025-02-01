@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mobi_wall/core/errors/error_model.dart';
 import 'package:mobi_wall/core/helpers/app_regex.dart';
+import 'package:mobi_wall/core/helpers/extensions.dart';
 import 'package:mobi_wall/core/widgets/custom_animated_container.dart';
 import 'package:mobi_wall/core/widgets/custom_bottom_sheet_text_form_field.dart';
 import 'package:mobi_wall/core/widgets/custom_elevated_button.dart';
@@ -39,7 +41,8 @@ class _AddChildBottomSheetState extends State<AddChildBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ParentCubit, ParentState>(
+    return BlocConsumer<ParentCubit, ParentState>(
+      listener: (context, state) => _listener(context, state),
       builder: (context, state) {
         return SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
@@ -103,25 +106,23 @@ class _AddChildBottomSheetState extends State<AddChildBottomSheet> {
                   hasMinLength: hasMinLength,
                 ),
                 SizedBox(height: 40.h),
-                CustomAnimatedContainer(
-                  state: ParentCubit.get(context).addChildState,
-                  child: CustomElevatedButton(
-                    text: 'Add',
-                    onPressed: () {
-                      if (!autoValidate) {
-                        setState(() {
-                          autoValidate = true;
-                        });
-                      }
-                      if (formKey.currentState!.validate()) {
-                        ParentCubit.get(context).addChild(
-                          context,
-                          username: usernameController.text.trim(),
-                          password: passwordController.text.trim(),
-                        );
-                      }
-                    },
-                  ),
+                CustomElevatedButton(
+                  text: 'Add',
+                  loading: ParentCubit.get(context).addChildState.isLoading(),
+                  onPressed: () {
+                    if (!autoValidate) {
+                      setState(() {
+                        autoValidate = true;
+                      });
+                    }
+                    if (formKey.currentState!.validate()) {
+                      ParentCubit.get(context).addChild(
+                        context,
+                        username: usernameController.text.trim(),
+                        password: passwordController.text.trim(),
+                      );
+                    }
+                  },
                 ),
                 SizedBox(height: 40.h),
                 SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
@@ -131,5 +132,9 @@ class _AddChildBottomSheetState extends State<AddChildBottomSheet> {
         );
       },
     );
+  }
+
+  _listener(BuildContext context, ParentState state) {
+    if (state is AddChildSuccessState) Navigator.pop(context);
   }
 }

@@ -7,7 +7,8 @@ abstract class Themes {
   static AppBarTheme appBarTheme = const AppBarTheme(
     toolbarHeight: 0,
     surfaceTintColor: Colors.transparent,
-    systemOverlayStyle:  SystemUiOverlayStyle(
+    color: Colors.white,
+    systemOverlayStyle: SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.dark,
       systemNavigationBarDividerColor: Colors.transparent,
