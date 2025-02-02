@@ -10,8 +10,7 @@ abstract class NotificationHelper {
 
   static FirebaseMessaging messaging = FirebaseMessaging.instance;
 
-  static void sendNotification(
-    context, {
+  static void sendNotification({
     required String token,
     bool updateBlockedApps = false,
     bool refreshData = false,

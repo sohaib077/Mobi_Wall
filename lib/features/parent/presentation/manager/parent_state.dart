@@ -49,10 +49,18 @@ final class UpdateBlockedAppsLoadingState extends ParentState {}
 
 final class UpdateBlockedAppsSuccessState extends ParentState {}
 
-final class UpdateBlockedAppsFailureState extends ParentState {}
+final class UpdateBlockedAppsFailureState extends ParentState {
+  final String message;
+
+  UpdateBlockedAppsFailureState(this.message);
+}
 
 final class UpdateBlockedUrlsLoadingState extends ParentState {}
 
 final class UpdateBlockedUrlsSuccessState extends ParentState {}
 
-final class UpdateBlockedUrlsFailureState extends ParentState {}
+final class UpdateBlockedUrlsFailureState extends ParentState {
+  final String message;
+
+  UpdateBlockedUrlsFailureState(this.message);
+}

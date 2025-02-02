@@ -91,7 +91,7 @@ class _ChildDetailsViewState extends State<ChildDetailsView>
             splashBorderRadius: BorderRadius.circular(radius),
             dividerColor: Colors.transparent,
             overlayColor:
-                MaterialStateProperty.all(Colors.white.withOpacity(0.1)),
+                WidgetStatePropertyAll(Colors.white.withOpacity(0.1)),
             indicatorPadding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
             controller: tabController,
             indicator: UnderlineTabIndicator(

@@ -6,7 +6,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:meta/meta.dart';
 import 'package:mobi_wall/core/enums/alert_state_enum.dart';
 import 'package:mobi_wall/core/enums/method_state_enum.dart';
-import 'package:mobi_wall/core/errors/error_model.dart';
 import 'package:mobi_wall/core/helpers/extensions.dart';
 import 'package:mobi_wall/core/helpers/notification_helper.dart';
 import 'package:mobi_wall/core/services/firebase_services.dart';
@@ -52,28 +51,6 @@ class ParentCubit extends Cubit<ParentState> {
         emit(AddChildSuccessState());
       },
     );
-
-    // FirebaseService()
-    //     .setChildData(
-    //         childData: ChildDataModel(
-    //   username: username,
-    //   password: password,
-    //   createdDate: DateTime.now(),
-    // ))
-    //     .then((value) {
-    //   addChildState = MethodState.success;
-    //   emit(AddChildSuccessState());
-    //   Future.delayed(const Duration(milliseconds: 500), () {
-    //     getChildren(context);
-    //     addChildState = MethodState.init;
-    //     emit(AddChildSuccessState());
-    //     Navigator.pop(context);
-    //   });
-    // }).catchError((error) {
-    //   addChildState = MethodState.init;
-    //   emit(AddChildFailureState());
-    //   showFirebaseErrorMessage(context, message: error.toString());
-    // });
   }
 
   MethodState getChildrenState = MethodState.init;
@@ -98,25 +75,6 @@ class ParentCubit extends Cubit<ParentState> {
         emit(GetChildrenSuccessState());
       },
     );
-    // await FirebaseService().getChildren().then((value) {
-    //   value.docs.forEach((element) {
-    //     children.add(ChildDataModel.fromJson(element.data()));
-    //     if (children.isNotEmpty && children.last.appsData != null) {
-    //       children.last.appsData!
-    //           .sort((b, a) => a.dailyUsage!.compareTo(b.dailyUsage!));
-    //     }
-    //   });
-    //
-    //   if (children.isNotEmpty) currentChild = children.first;
-    //
-    //   getChildrenState =
-    //       children.isNotEmpty ? MethodState.success : MethodState.empty;
-    //   emit(GetChildrenSuccessState());
-    // }).catchError((error) {
-    //   getChildrenState = MethodState.failed;
-    //   emit(GetChildrenFailureState());
-    //   showFirebaseErrorMessage(context, message: error.toString());
-    // });
   }
 
   MethodState deleteChildState = MethodState.init;
@@ -138,17 +96,6 @@ class ParentCubit extends Cubit<ParentState> {
         emit(DeleteChildSuccessState());
       },
     );
-
-    // FirebaseService().deleteChild(username: username).then((value) {
-    //   getChildren();
-    //   deleteChildState = MethodState.success;
-    //   emit(DeleteChildSuccessState());
-    //   Navigator.pop(context);
-    // }).catchError((error) {
-    //   deleteChildState = MethodState.failed;
-    //   emit(DeleteChildFailureState());
-    //   showFirebaseErrorMessage(context, message: error.toString());
-    // });
   }
 
   late ChildDataModel currentChild;
@@ -177,13 +124,11 @@ class ParentCubit extends Cubit<ParentState> {
     if (!blockedApps.contains(app)) blockedApps.add(app);
     log("blocked apps after = ${blockedApps.toString()}");
     checkIfBlockedAppsChanged();
-    // emit(BlockAppState());
   }
 
   void unBlockApp({required String app}) {
     blockedApps.remove(app);
     checkIfBlockedAppsChanged();
-    // emit(UnblockAppState());
   }
 
   bool isBlockedAppsChanged = false;
@@ -214,37 +159,30 @@ class ParentCubit extends Cubit<ParentState> {
 
   MethodState updateBlockedAppsState = MethodState.init;
 
-  void updateBlockedApps(context) {
-    if (updateBlockedAppsState == MethodState.loading) return;
+  Future<void> updateBlockedApps(context) async {
+    if (updateBlockedAppsState.isLoading()) return;
     updateBlockedAppsState = MethodState.loading;
     emit(UpdateBlockedAppsLoadingState());
-    FirebaseService()
-        .updateBlockedApps(
-            blockedApps: blockedApps, childUsername: currentChild.username)
-        .then((value) async {
-      Navigator.pop(context);
-      showAlertDialog(
-        context,
-        state: AlertState.success,
-        description: "Blocked apps are updated successfully",
-      );
-      NotificationHelper.sendNotification(
-        context,
-        token: currentChild.token ?? "",
-        updateBlockedApps: true,
-        blockedApps: blockedApps,
-        notification: false,
-      );
-      getChildren().then((value) {
+
+    final result = await _parentRepo.updateBlockedApps(
+        blockedApps: blockedApps, childUsername: currentChild.username);
+    result.fold(
+      (error) {
+        updateBlockedAppsState = MethodState.failed;
+        emit(UpdateBlockedAppsFailureState(error.getErrorsMessage()));
+      },
+      (r) async {
+        NotificationHelper.sendNotification(
+          token: currentChild.token ?? "",
+          updateBlockedApps: true,
+          blockedApps: blockedApps,
+          notification: false,
+        );
+        getChildren();
         updateBlockedAppsState = MethodState.success;
         emit(UpdateBlockedAppsSuccessState());
-      });
-    }).catchError((error) {
-      updateBlockedAppsState = MethodState.failed;
-      emit(UpdateBlockedAppsFailureState());
-      log("error = ${error.toString()}");
-      showFirebaseErrorMessage(context, message: error.toString());
-    });
+      },
+    );
   }
 
   /// ////////////////////// Blocking urls //////////////////////////////
@@ -253,13 +191,14 @@ class ParentCubit extends Cubit<ParentState> {
 
   MethodState updateBlockedUrlsState = MethodState.init;
 
-  void updateBlockedUrls(context, {required String url, bool delete = false}) {
-    if (updateBlockedUrlsState == MethodState.loading) return;
+  Future<void> updateBlockedUrls(context,
+      {required String url, bool delete = false}) async {
+    if (updateBlockedUrlsState.isLoading()) return;
     if (!delete && blockedUrls.contains(url)) {
       showAlertDialog(
         context,
         state: AlertState.warning,
-        description: "\nThis url is already blocked\n",
+        description: "This url is already blocked",
       );
       return;
     }
@@ -269,37 +208,18 @@ class ParentCubit extends Cubit<ParentState> {
       blockedUrls.add(url);
     updateBlockedUrlsState = MethodState.loading;
     emit(UpdateBlockedUrlsLoadingState());
-    FirebaseService()
-        .updateBlockedUrls(
-            blockedUrls: blockedUrls, childUsername: currentChild.username)
-        .then((value) async {
-      getChildren().then((value) {
+
+    final result = await _parentRepo.updateBlockedUrls(
+        blockedUrls: blockedUrls, childUsername: currentChild.username);
+    result.fold(
+      (error) {
+        updateBlockedUrlsState = MethodState.failed;
+        emit(UpdateBlockedUrlsFailureState(error.getErrorsMessage()));
+      },
+      (r) {
         updateBlockedUrlsState = MethodState.success;
         emit(UpdateBlockedUrlsSuccessState());
-        Future.delayed(const Duration(milliseconds: 500), () {
-          updateBlockedUrlsState = MethodState.init;
-          emit(AddChildSuccessState());
-          Navigator.pop(context);
-          Navigator.pop(context);
-          showAlertDialog(
-            context,
-            state: AlertState.success,
-            description: "Blocked urls are updated successfully",
-          );
-        });
-        // NotificationHelper.sendNotification(
-        //   context,
-        //   token: currentChild.token ?? "",
-        //   updateBlockedApps: true,
-        //   blockedApps: blockedApps,
-        //   notification: false,
-        // );
-      });
-    }).catchError((error) {
-      updateBlockedUrlsState = MethodState.init;
-      emit(UpdateBlockedUrlsFailureState());
-      log("error = ${error.toString()}");
-      showFirebaseErrorMessage(context, message: error.toString());
-    });
+      },
+    );
   }
 }

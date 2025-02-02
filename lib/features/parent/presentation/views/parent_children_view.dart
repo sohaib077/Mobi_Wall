@@ -86,8 +86,7 @@ class _ParentChildrenViewState extends State<ParentChildrenView> {
 
   _listener(BuildContext context, ParentState state) {
     if (state is GetChildrenFailureState ||
-        state is AddChildFailureState ||
-        state is DeleteChildFailureState) {
+        state is AddChildFailureState ) {
       showAlertDialog(context, description: (state as dynamic).message);
     }
   }

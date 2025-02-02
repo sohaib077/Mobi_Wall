@@ -56,4 +56,26 @@ class ParentRepoImpl implements ParentRepo {
       return left(ErrorHandler.handle(e));
     }
   }
+
+  /// /////////////////// APPs /////////////////
+
+  @override
+  Future<Either<ErrorModel, void>> updateBlockedApps({required List<String> blockedApps,required String childUsername})async{
+     try {
+      await _fb.updateBlockedApps(blockedApps: blockedApps, childUsername: childUsername);
+      return const Right(null);
+    } on Exception catch (e) {
+      return left(ErrorHandler.handle(e));
+    }
+  }
+
+  @override
+  Future<Either<ErrorModel, void>> updateBlockedUrls({required List<String> blockedUrls,required String childUsername})async{
+     try {
+      await _fb.updateBlockedUrls(blockedUrls: blockedUrls, childUsername: childUsername);
+      return const Right(null);
+    } on Exception catch (e) {
+      return left(ErrorHandler.handle(e));
+    }
+  }
 }
