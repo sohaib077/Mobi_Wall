@@ -76,7 +76,7 @@ class OtpCubit extends Cubit<OtpState> {
       verifyState = MethodState.init;
 
       showAlertDialog(context,
-          state: AlertState.failed, description: "\nWrong code\n");
+          state: AlertState.failed, description: "Wrong code");
       emit(ErrorOccurred(errorMsg: error.toString()));
     }
     // print('sms code from credential ${credential.smsCode}');
@@ -108,7 +108,7 @@ class OtpCubit extends Cubit<OtpState> {
         Navigator.pop(context);
       }
       showAlertDialog(context,
-          state: AlertState.failed, description: "\nWrong code\n");
+          state: AlertState.failed, description: "Wrong code");
       emit(ErrorOccurred(errorMsg: error.toString()));
     }
   }

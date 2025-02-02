@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mobi_wall/core/enums/alert_state_enum.dart';
 import 'package:mobi_wall/core/utils/assets_data.dart';
 import 'package:mobi_wall/core/enums/method_state_enum.dart';
 import 'package:mobi_wall/core/widgets/custom_card.dart';
@@ -24,7 +25,8 @@ class AppsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ParentCubit, ParentState>(
+    return BlocConsumer<ParentCubit, ParentState>(
+      listener: (context, state) => _listener(context, state),
       builder: (context, state) {
         return Expanded(
           child: Column(
@@ -112,5 +114,21 @@ class AppsList extends StatelessWidget {
         );
       },
     );
+  }
+
+  _listener(BuildContext context, ParentState state) {
+    if (state is UpdateBlockedAppsFailureState) {
+      showAlertDialog(
+        context,
+        description: state.message,
+      );
+    } else if (state is UpdateBlockedAppsSuccessState) {
+      Navigator.pop(context);
+      showAlertDialog(
+        context,
+        state: AlertState.success,
+        description: "Blocked apps are updated successfully",
+      );
+    }
   }
 }

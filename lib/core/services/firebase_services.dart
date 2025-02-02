@@ -73,20 +73,24 @@ class FirebaseService {
       .doc(Constants.userData.id)
       .collection(_childrenCollection);
 
-  Future<void> setChildData({
+  Future<bool> checkIfChildExists({
     required ChildDataModel childData,
   }) async {
-    await _db
+    return await _db
         .collection(_usersCollection)
         .doc(Constants.userData.id)
         .collection(_childrenCollection)
         .doc(childData.username)
         .get()
         .then((value) {
-      if (value.exists)
-        throw ("You've added a child with the same username before.");
+      if (value.exists) return true;
+      return false;
     });
+  }
 
+  Future<void> setChildData({
+    required ChildDataModel childData,
+  }) async {
     return await _db
         .collection(_usersCollection)
         .doc(Constants.userData.id)

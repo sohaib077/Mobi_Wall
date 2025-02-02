@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:mobi_wall/core/enums/method_state_enum.dart';
+import 'package:mobi_wall/core/functions/setup_service_locator.dart';
+import 'package:mobi_wall/core/helpers/extensions.dart';
 import 'package:mobi_wall/core/utils/date_time_handler.dart';
 import 'package:mobi_wall/core/widgets/custom_card.dart';
 import 'package:mobi_wall/core/widgets/custom_deleting_alert_dialog.dart';
@@ -47,18 +48,23 @@ class ChildItem extends StatelessWidget {
                 onPressed: (BuildContext context) {
                   showDialog(
                     context: context,
-                    builder: (context) => BlocBuilder<ParentCubit, ParentState>(
-                      builder: (context, state) {
-                        return CustomDeletingAlertDialog(
-                          text: "Wanna delete this child !",
-                          loading: ParentCubit.get(context).deleteChildState ==
-                              MethodState.loading,
-                          onDeleting: () {
-                            ParentCubit.get(context)
-                                .deleteChild(context, username: child.username);
-                          },
-                        );
-                      },
+                    builder: (context) => BlocProvider.value(
+                      value: sl<ParentCubit>(),
+                      child: BlocConsumer<ParentCubit, ParentState>(
+                        listener: (context, state) => _listener(context, state),
+                        builder: (context, state) {
+                          return CustomDeletingAlertDialog(
+                            text: "Wanna delete this child !",
+                            loading: ParentCubit.get(context)
+                                .deleteChildState
+                                .isLoading(),
+                            onDeleting: () {
+                              ParentCubit.get(context).deleteChild(context,
+                                  username: child.username);
+                            },
+                          );
+                        },
+                      ),
                     ),
                   );
                 },
@@ -117,5 +123,19 @@ class ChildItem extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  _listener(BuildContext context, ParentState state) {
+    if (state is DeleteChildSuccessState) Navigator.pop(context);
+    if (state is DeleteChildFailureState) {
+      showAlertDialog(
+        context,
+        description: state.message,
+        onTap: () {
+          Navigator.pop(context);
+          Navigator.pop(context);
+        },
+      );
+    }
   }
 }

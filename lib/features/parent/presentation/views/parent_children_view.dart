@@ -3,7 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:mobi_wall/core/enums/method_state_enum.dart';
+import 'package:mobi_wall/core/functions/setup_service_locator.dart';
 import 'package:mobi_wall/core/helpers/cache_helper.dart';
 import 'package:mobi_wall/core/services/firebase_services.dart';
 import 'package:mobi_wall/core/utils/constants.dart';
@@ -29,26 +29,29 @@ class _ParentChildrenViewState extends State<ParentChildrenView> {
   @override
   void initState() {
     super.initState();
-    if (ParentCubit.get(context).children.isEmpty) {
-      ParentCubit.get(context).getChildren(context).then((value) {
-        FirebaseService().updateUserToken().then((value) {
-          log("parent token is updated successfully and token = \n$value");
-        }).catchError((error) {
-          log("Error while updating parent token : $error");
-        });
-      });
-    }
+    // if (ParentCubit.get(context).children.isEmpty) {
+    //   ParentCubit.get(context).getChildren().then((value) {
+    //     FirebaseService().updateUserToken().then((value) {
+    //       log("parent token is updated successfully and token = \n$value");
+    //     }).catchError((error) {
+    //       log("Error while updating parent token : $error");
+    //     });
+    //   });
+    // }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(),
       floatingActionButton: const AddChildFloatingActionButton(),
-      body: SafeArea(
+      body: BlocProvider.value(
+        value: sl<ParentCubit>()..getChildren(),
         child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
+          physics:  const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
           padding: EdgeInsets.symmetric(horizontal: 16.w),
-          child: BlocBuilder<ParentCubit, ParentState>(
+          child: BlocConsumer<ParentCubit, ParentState>(
+            listener: (context, state) => _listener(context, state),
             builder: (context, state) {
               List<ChildDataModel> children = ParentCubit.get(context).children;
               return Column(
@@ -57,22 +60,18 @@ class _ParentChildrenViewState extends State<ParentChildrenView> {
                   CustomTitleAppBar(
                     title: "Children",
                     onBack: () {
-                      CacheHelper.removeData( Constants.cachedIsParent);
+                      CacheHelper.removeData(Constants.cachedIsParent);
                       navigateAndFinish(context, const HomeView(), x: -1, y: 0);
                     },
                     onRefresh: () {
-                      if (ParentCubit.get(context).getChildrenState !=
-                          MethodState.loading) {
-                        ParentCubit.get(context).getChildren(context);
-                      }
+                      ParentCubit.get(context).getChildren();
                     },
                   ),
                   SizedBox(height: 20.h),
                   CustomStateWidget(
                     state: ParentCubit.get(context).getChildrenState,
                     widget: ParentChildrenList(children: children),
-                    onError: () =>
-                        ParentCubit.get(context).getChildren(context),
+                    onError: () => ParentCubit.get(context).getChildren(),
                     emptyWidget: const CustomEmptyStateWidget(),
                   ),
                   SizedBox(height: 50.h),
@@ -83,5 +82,12 @@ class _ParentChildrenViewState extends State<ParentChildrenView> {
         ),
       ),
     );
+  }
+
+  _listener(BuildContext context, ParentState state) {
+    if (state is GetChildrenFailureState ||
+        state is AddChildFailureState ) {
+      showAlertDialog(context, description: (state as dynamic).message);
+    }
   }
 }
