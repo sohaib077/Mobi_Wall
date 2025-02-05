@@ -5,7 +5,7 @@ import 'constants.dart';
 
 class BackgroundServices {
   static const MethodChannel _channel =
-      MethodChannel('com.example.myapp/installed_apps');
+      MethodChannel('fayoum.university.mobi_wall');
 
   static Future<void> startPeriodicDataRefreshing(context) async {
     String state = "";
