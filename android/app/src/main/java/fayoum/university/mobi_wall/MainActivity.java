@@ -58,7 +58,6 @@ public class MainActivity extends FlutterActivity {
 
     private static final String CHANNEL = "fayoum.university.mobi_wall";
     public static Activity activity;
-    private final String cachedHideAppIcon = "hideAppIcon";
     private boolean isChild = false;
     private String id;
     private String childName;
@@ -321,11 +320,6 @@ public class MainActivity extends FlutterActivity {
         adb -s emulator-5558 shell dpm remove-active-admin fayoum.university.mobi_wall/.MyDeviceAdminReceiver
          */
 
-        ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-        //        if (requestCode == VPN_REQUEST_CODE && resultCode == RESULT_OK) {
-        //            Intent intent = new Intent(this, MyVpnService.class);
-        //            startService(intent);
-        //        }
     }
 
     @Override

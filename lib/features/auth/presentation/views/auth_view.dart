@@ -9,6 +9,7 @@ import 'package:mobi_wall/core/widgets/unfocus.dart';
 import 'package:mobi_wall/features/auth/presentation/manager/auth_cubit.dart';
 import 'package:mobi_wall/features/auth/presentation/views/widgets/login_view.dart';
 import 'package:mobi_wall/features/auth/presentation/views/widgets/signup_view.dart';
+import 'package:mobi_wall/features/home/presentation/views/home_view.dart';
 
 class AuthView extends StatelessWidget {
   const AuthView({super.key});
@@ -43,7 +44,7 @@ class AuthView extends StatelessWidget {
     else if (state is RegisterFailureState)
       showAlertDialog(context,
           title: 'Register Failed', description: state.message);
-    // else if (state is LoginSuccessState || state is RegisterSuccessState)
-      // navigateAndFinish(context, const HomeView(), fade: true);
+    else if (state is LoginSuccessState || state is RegisterSuccessState)
+      navigateAndFinish(context, const HomeView(), fade: true);
   }
 }

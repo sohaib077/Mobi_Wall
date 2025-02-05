@@ -57,7 +57,7 @@ public class SendDataWorker extends Worker {
                 }
             }
             if (!initializedBefore)
-                FirebaseApp.initializeApp(this.getApplicationContext(), new FirebaseOptions.Builder().setApiKey("'AIzaSyCQHjVsVP5aKYsJc_g4LYB5sJHMqTUsm2o'").setApplicationId("1:1053062966742:android:f79eb0a5ceac5d71ef4877").setGcmSenderId("1053062966742").setProjectId("mobiwall-abc0f").build());
+                FirebaseApp.initializeApp(this.getApplicationContext(), new FirebaseOptions.Builder().setApiKey("'AIzaSyDfwJq_1hj8SVKjAD7BlVBX78UPuky3Rl4'").setApplicationId("1:928204233885:android:96c21b60a5c5bfc5e24874").setGcmSenderId("928204233885").setProjectId("mobiwall-43f95").build());
             SendData(context, id, childName);
             Result.retry();
         }
@@ -111,10 +111,10 @@ public class SendDataWorker extends Worker {
         System.out.println("apps length " + apps.size());
         System.out.println("address = " + address.values());
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        if (address.containsKey("latitude"))
+//        if (address.containsKey("latitude"))
             db.collection("users").document(id).collection("children").document(childName).update("updatedDate", new Date(), "apps", apps, "location", address, "calls", calls);
-        else
-            db.collection("users").document(id).collection("children").document(childName).update("updatedDate", new Date(), "apps", apps, "calls", calls);
+//        else
+//            db.collection("users").document(id).collection("children").document(childName).update("updatedDate", new Date(), "apps", apps, "calls", calls);
 
     }
 
