@@ -7,4 +7,8 @@ final class ChildrenInitial extends ChildrenState {}
 
 final class LoginChildLoadingState extends ChildrenState {}
 final class LoginChildSuccessState extends ChildrenState {}
-final class LoginChildFailureState extends ChildrenState {}
+final class LoginChildFailureState extends ChildrenState {
+  final String message;
+
+  LoginChildFailureState(this.message);
+}

@@ -18,14 +18,15 @@ Future<void> setupCacheHelper() async {
   Constants.iconHided = CacheHelper.getData(Constants.cachedIconHided) ?? false;
   Constants.isParent = CacheHelper.getData(Constants.cachedIsParent) ?? false;
 
+
+
   var jsonData = CacheHelper.getJsonData(Constants.cachedChild);
   if (jsonData != null) {
-    var cashedDataMap = jsonDecode(jsonData);
-    Constants.childData = ChildDataModel.fromJson(cashedDataMap);
+    Constants.childData = ChildDataModel.fromJson(jsonData);
   }
 
   log(" === onboarding === ${Constants.onboarding}");
   log(" === id === ${Constants.id}");
   log(" === otp === ${Constants.otp}");
-  // log(" === child username === ${Constants.childData?.username}");
+  log(" === child username === ${Constants.childData?.username}");
 }

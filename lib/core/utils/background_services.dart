@@ -20,10 +20,12 @@ class BackgroundServices {
           state: AlertState.failed, description: "Try again, ${e.message}");
     }
 
-    showAlertDialog(context,
-        state:
-            state.contains("try again") ? AlertState.failed : AlertState.success,
-        description: "\n$state\n");
+    showAlertDialog(
+      context,
+      state:
+          state.contains("try again") ? AlertState.failed : AlertState.success,
+      description: state,
+    );
   }
 
   static Future<void> stopPeriodicTasks(context) async {
@@ -34,23 +36,25 @@ class BackgroundServices {
       showAlertDialog(context,
           state: AlertState.failed, description: "Try again, ${e.message}");
     }
-    showAlertDialog(context, state: AlertState.success, description: "\n$state\n");
+    showAlertDialog(context,
+        state: AlertState.success, description: state);
   }
 
-  static Future<bool> getPermissions() async {
-    bool state = false;
+  static Future getPermissions() async {
     try {
-      state = await _channel.invokeMethod('getPermissions').then((value) async {
-        return await _channel
-            .invokeMethod("getUsageAccessPermission")
-            .then((value) async {
-          return await _channel.invokeMethod("blockUninstall");
-        });
-      });
+      await _channel.invokeMethod('getPermissions');
     } on PlatformException catch (e) {
-      print('Failed to retrieve installed apps: ${e.message}');
+      print('Failed to get permissions: ${e.message}');
     }
-    return state;
+  }
+
+  static Future getUsageAccessAndAdminActivation() async {
+    try {
+      await _channel.invokeMethod('getUsageAccessPermission');
+      await _channel.invokeMethod('blockUninstall');
+    } on PlatformException catch (e) {
+      print('Failed to getUsageAccessAndAdminActivation: ${e.message}');
+    }
   }
 
   static Future<void> hideAppIcon() async {

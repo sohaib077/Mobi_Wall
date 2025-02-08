@@ -1,10 +1,12 @@
 package fayoum.university.mobi_wall;
+
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.CallLog;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -22,30 +24,29 @@ public class CallLogs {
         List<Map<String, Object>> callLogs = new ArrayList<>();
 
         Uri callLogUri = CallLog.Calls.CONTENT_URI;
-        String[] projection = {
-                CallLog.Calls.NUMBER,
-                CallLog.Calls.TYPE,
-                CallLog.Calls.DATE,
-                CallLog.Calls.DURATION,
-                CallLog.Calls.CACHED_NAME,
-        };
-        String sortOrder = CallLog.Calls.DATE + " DESC LIMIT 20";
+        String[] projection = {CallLog.Calls.NUMBER, CallLog.Calls.TYPE, CallLog.Calls.DATE, CallLog.Calls.DURATION, CallLog.Calls.CACHED_NAME,};
+        String sortOrder = CallLog.Calls.DATE + " DESC";
 
         ContentResolver contentResolver = context.getContentResolver();
         Cursor cursor = contentResolver.query(callLogUri, projection, null, null, sortOrder);
 
         if (cursor != null) {
-            while (cursor.moveToNext()) {
-                @SuppressLint("Range") String number = cursor.getString(cursor.getColumnIndex(CallLog.Calls.NUMBER));
-                @SuppressLint("Range") String type = cursor.getString(cursor.getColumnIndex(CallLog.Calls.TYPE));
-                @SuppressLint("Range") String date = cursor.getString(cursor.getColumnIndex(CallLog.Calls.DATE));
-                @SuppressLint("Range") String duration = cursor.getString(cursor.getColumnIndex(CallLog.Calls.DURATION));
-                @SuppressLint("Range") String name = cursor.getString(cursor.getColumnIndex(CallLog.Calls.CACHED_NAME));
+            try {
+                int limit = 20;
+                while (cursor.moveToNext() && limit > 0) {
+                    @SuppressLint("Range") String number = cursor.getString(cursor.getColumnIndex(CallLog.Calls.NUMBER));
+                    @SuppressLint("Range") String type = cursor.getString(cursor.getColumnIndex(CallLog.Calls.TYPE));
+                    @SuppressLint("Range") String date = cursor.getString(cursor.getColumnIndex(CallLog.Calls.DATE));
+                    @SuppressLint("Range") String duration = cursor.getString(cursor.getColumnIndex(CallLog.Calls.DURATION));
+                    @SuppressLint("Range") String name = cursor.getString(cursor.getColumnIndex(CallLog.Calls.CACHED_NAME));
 
-                CallLogModel callLogEntry = new CallLogModel(number, type, date, duration , name);
-                callLogs.add(callLogEntry.toMap());
+                    CallLogModel callLogEntry = new CallLogModel(number, type, date, duration, name);
+                    callLogs.add(callLogEntry.toMap());
+                    limit--;
+                }
+            } finally {
+                cursor.close();
             }
-            cursor.close();
         }
 
         return callLogs;

@@ -74,15 +74,9 @@ class FirebaseService {
       .collection(_childrenCollection);
 
   Future<bool> checkIfChildExists({
-    required ChildDataModel childData,
+    required String username,
   }) async {
-    return await _db
-        .collection(_usersCollection)
-        .doc(Constants.userData.id)
-        .collection(_childrenCollection)
-        .doc(childData.username)
-        .get()
-        .then((value) {
+    return await _childRF.doc(username).get().then((value) {
       if (value.exists) return true;
       return false;
     });
@@ -109,10 +103,6 @@ class FirebaseService {
 
   Future<DocumentSnapshot<Map<String, dynamic>>> loginChild(
       {required String username}) async {
-    await _childRF.doc(username).get().then((value) {
-      if (!value.exists) throw ("\nWrong username\n");
-    });
-
     return await _db
         .collection(_usersCollection)
         .doc(Constants.userData.id)
