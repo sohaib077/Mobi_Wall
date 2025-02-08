@@ -136,6 +136,7 @@ class FirebaseService {
   Future<void> refreshAppsData({
     required List<Map<String, dynamic>> apps,
   }) async {
+    if (apps.isEmpty) return;
     await _appsDocRef.update({'apps': apps, 'updatedDate': DateTime.now()});
   }
 

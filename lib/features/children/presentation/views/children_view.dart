@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mobi_wall/core/enums/method_state_enum.dart';
+import 'package:mobi_wall/core/functions/setup_service_locator.dart';
 import 'package:mobi_wall/core/helpers/cache_helper.dart';
 import 'package:mobi_wall/core/services/firebase_services.dart';
 import 'package:mobi_wall/core/utils/app_colors.dart';
@@ -46,21 +47,17 @@ class _ChildrenViewState extends State<ChildrenView> {
     // BackgroundServices.getPermissions();
   }
 
-  void _refreshData() {
-    /// uncomment
-    // ChildAppsCubit.get(context).setlAppsList(context).then((value) {
-    ChildAppsCubit.get(context).uploadAppsData(context).then((value) {
-      ChildAppsCubit.get(context).uploadLocationData(context);
-    });
-    // });
+  void _refreshData(BuildContext context) {
+    ChildAppsCubit.get(context).setlAppsList();
+    // ChildAppsCubit.get(context).refreshData();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: BlocProvider(
-        create: (context) => ChildAppsCubit(),
+      body: BlocProvider.value(
+        value: sl<ChildAppsCubit>(),
         child: BlocBuilder<ChildAppsCubit, ChildAppsState>(
           builder: (context, state) {
             MethodState refreshAppsState =
@@ -87,13 +84,11 @@ class _ChildrenViewState extends State<ChildrenView> {
                   ),
                   const Spacer(),
                   _buildItem(context,
-                      state: refreshAppsState, text: "Refreshing apps Data"),
+                      state: refreshAppsState, text: "Refreshing Apps Data"),
                   SizedBox(height: 20.h),
                   _buildItem(context,
                       state: refreshLocationState,
-                      text: "Refreshing current location"),
-                  // SizedBox(height: 20.h),
-                  // HideAppCard(),
+                      text: "Refreshing Current Location"),
                   const Spacer(flex: 2),
                   Padding(
                     padding: EdgeInsets.symmetric(
@@ -110,7 +105,7 @@ class _ChildrenViewState extends State<ChildrenView> {
                       onPressed: () async {
                         if (refreshAppsState != MethodState.loading ||
                             refreshLocationState != MethodState.loading) {
-                          _refreshData();
+                          _refreshData(context);
                         }
                       },
                       text: "Refresh data"),
@@ -149,7 +144,6 @@ class _ChildrenViewState extends State<ChildrenView> {
   }
 
   _showInfoDialog(BuildContext context) {
-    // set up the button
     Widget okButton = TextButton(
       child: Text(
         "OK",
@@ -160,11 +154,9 @@ class _ChildrenViewState extends State<ChildrenView> {
         CacheHelper.saveData(key: Constants.cachedPermissions, value: false);
         Navigator.pop(context);
         await BackgroundServices.getUsageAccessAndAdminActivation();
-        // BackgroundServices.startPeriodicDataRefreshing();
       },
     );
 
-    // set up the AlertDialog
     AlertDialog alert = AlertDialog(
       surfaceTintColor: Colors.white,
       backgroundColor: Colors.white,
@@ -232,20 +224,6 @@ class _ChildrenViewState extends State<ChildrenView> {
       onPressed: () {
         Navigator.pop(context);
         BackgroundServices.stopPeriodicTasks(context);
-        // showModalBottomSheet(
-        //   shape: Constants.modalSheetDecoration(),
-        //   isScrollControlled: true,
-        //   context: context,
-        //   builder: (context) {
-        //     return PasswordBottomSheet(
-        //       actionTitle: "S T O P",
-        //       action: () {
-        //         Navigator.pop(context);
-        //         BackgroundServices.stopPeriodicTasks(context);
-        //       },
-        //     );
-        //   },
-        // );
       },
       text: "Stop",
       color: Colors.red,
@@ -303,7 +281,6 @@ class _ChildrenViewState extends State<ChildrenView> {
       ],
     );
 
-    // show the dialog
     showDialog(
       // barrierDismissible: false,
       context: context,

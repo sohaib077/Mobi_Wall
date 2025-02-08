@@ -75,8 +75,8 @@ public class MainActivity extends FlutterActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         NotificationHelper.createNotificationChannel(this);
-        Intent serviceIntent = new Intent(this, AppUsageMonitorService.class);
-        this.stopService(serviceIntent);
+//        Intent serviceIntent = new Intent(this, AppUsageMonitorService.class);
+//        this.stopService(serviceIntent);
 
         SharedPreferences sharedPref = getSharedPreferences(PREFS_NAME, 0);
         boolean isLocked = sharedPref.getBoolean("locked", false);
@@ -108,12 +108,12 @@ public class MainActivity extends FlutterActivity {
         SharedPreferences sharedPref = getSharedPreferences(PREFS_NAME, 0);
         boolean isChild = sharedPref.getBoolean("isChild", false);
         if (isChild) {
-            Intent serviceIntent = new Intent(this, AppUsageMonitorService.class);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                this.startForegroundService(serviceIntent);
-            } else {
-                this.startService(serviceIntent);
-            }
+//            Intent serviceIntent = new Intent(this, AppUsageMonitorService.class);
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                this.startForegroundService(serviceIntent);
+//            } else {
+//                this.startService(serviceIntent);
+//            }
 
 
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
