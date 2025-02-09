@@ -15,7 +15,7 @@ class ParentRepoImpl implements ParentRepo {
   Future<Either<ErrorModel, void>> addChild(
       {required ChildDataModel childData}) async {
     try {
-      final bool exists = await _fb.checkIfChildExists(childData: childData);
+      final bool exists = await _fb.checkIfChildExists(username: childData.username);
       if (exists) {
         return left(ErrorModel(
             message: "You've added a child with the same username before."));

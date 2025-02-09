@@ -1,4 +1,3 @@
-
 class AppDataModel {
   String packageName;
   String name;
@@ -32,6 +31,11 @@ class AppDataModel {
       'weeklyUsageTime': weeklyUsage?.inMilliseconds ?? 0,
       'monthlyUsageTime': monthlyUsage?.inMilliseconds ?? 0,
     };
+  }
+
+  @override
+  String toString() {
+    return 'AppDataModel{packageName: $packageName, name: $name, dailyUsage: $dailyUsage, weeklyUsage: $weeklyUsage, monthlyUsage: $monthlyUsage}';
   }
 }
 

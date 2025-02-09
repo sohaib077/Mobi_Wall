@@ -1,4 +1,5 @@
 package fayoum.university.mobi_wall;
+
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
@@ -12,12 +13,17 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.util.Log;
+
 import androidx.annotation.Nullable;
+
 import java.util.HashSet;
 import java.util.List;
+
 import android.app.Notification;
 import android.app.PendingIntent;
+
 import androidx.core.app.NotificationCompat;
+
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -73,21 +79,21 @@ public class AppUsageMonitorService extends Service {
         Set<String> set = new HashSet<>();
         set = sharedPref1.getStringSet("blockedApps", new HashSet<>());
 
-            long endTime = System.currentTimeMillis();
-            long startTime = endTime - 10000; // Look for app usage in the last 10 seconds
+        long endTime = System.currentTimeMillis();
+        long startTime = endTime - 10000; // Look for app usage in the last 10 seconds
 
-            UsageStatsManager usageStatsManager = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
-            List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_BEST, startTime, endTime);
-            if (usageStatsList != null && !usageStatsList.isEmpty()) {
-                SortedMap<Long, UsageStats> sortedMap = new TreeMap<>();
-                for (UsageStats usageStats : usageStatsList) {
-                    sortedMap.put(usageStats.getLastTimeUsed(), usageStats);
-                }
-                if (!sortedMap.isEmpty()) {
-                    foregroundApp = sortedMap.get(sortedMap.lastKey()).getPackageName();
-                }
+        UsageStatsManager usageStatsManager = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
+        List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_BEST, startTime, endTime);
+        if (usageStatsList != null && !usageStatsList.isEmpty()) {
+            SortedMap<Long, UsageStats> sortedMap = new TreeMap<>();
+            for (UsageStats usageStats : usageStatsList) {
+                sortedMap.put(usageStats.getLastTimeUsed(), usageStats);
             }
-        if (set.contains(foregroundApp)) {
+            if (!sortedMap.isEmpty()) {
+                foregroundApp = sortedMap.get(sortedMap.lastKey()).getPackageName();
+            }
+        }
+        if (set.contains(foregroundApp) || foregroundApp.contains("youtube")) {
             System.out.println("trying to open mobiwall app");
 
             SharedPreferences sharedPref = getApplicationContext().getSharedPreferences(MainActivity.PREFS_NAME, 0);
@@ -103,8 +109,8 @@ public class AppUsageMonitorService extends Service {
     private void launchApp(Context context, String packageName) {
 
         Intent launchIntent = getPackageManager().getLaunchIntentForPackage(packageName);
-
         if (launchIntent != null) {
+            System.out.println("intent != null");
             launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(launchIntent);
 //        stopSelf(); // Stop the service after launching the app

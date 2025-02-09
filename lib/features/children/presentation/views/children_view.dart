@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mobi_wall/core/enums/method_state_enum.dart';
+import 'package:mobi_wall/core/functions/setup_service_locator.dart';
 import 'package:mobi_wall/core/helpers/cache_helper.dart';
 import 'package:mobi_wall/core/services/firebase_services.dart';
 import 'package:mobi_wall/core/utils/app_colors.dart';
@@ -14,7 +15,6 @@ import 'package:mobi_wall/core/utils/styles.dart';
 import 'package:mobi_wall/core/widgets/custom_card.dart';
 import 'package:mobi_wall/core/widgets/custom_elevated_button.dart';
 import 'package:mobi_wall/core/widgets/custom_log_out_button.dart';
-import 'package:mobi_wall/core/widgets/password_bottom_sheet.dart';
 import 'package:mobi_wall/features/children/presentation/manager/child_apps_cubit/child_apps_cubit.dart';
 
 class ChildrenView extends StatefulWidget {
@@ -33,6 +33,9 @@ class _ChildrenViewState extends State<ChildrenView> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _showInfoDialog(context);
       });
+    } else {
+      BackgroundServices.getPermissions();
+      BackgroundServices.getUsageAccessAndAdminActivation();
     }
 
     FirebaseService().updateChildToken().then((value) {
@@ -44,81 +47,73 @@ class _ChildrenViewState extends State<ChildrenView> {
     // BackgroundServices.getPermissions();
   }
 
-  void _refreshData() {
-    /// uncomment
-    // ChildAppsCubit.get(context).setlAppsList(context).then((value) {
-      ChildAppsCubit.get(context).uploadAppsData(context).then((value) {
-        ChildAppsCubit.get(context).uploadLocationData(context);
-      });
-    // });
+  void _refreshData(BuildContext context) {
+    ChildAppsCubit.get(context).setlAppsList();
+    // ChildAppsCubit.get(context).refreshData();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: BlocBuilder<ChildAppsCubit, ChildAppsState>(
-            builder: (context, state) {
-              MethodState refreshAppsState =
-                  ChildAppsCubit.get(context).refreshAppsDataState;
-              MethodState refreshLocationState =
-                  ChildAppsCubit.get(context).refreshLocationState;
-              return Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.w),
-                child: Column(
-                  // mainAxisAlignment: MainAxisAlignment.////,
-                  children: [
-                    SizedBox(height: 10.h),
-                    const Row(
-                      children: [
-                        // CustomBackArrow(backToHome: true),
-                        Spacer(),
-                        CustomLogOutButton(),
-                      ],
-                    ),
-                    SizedBox(height: 10.h),
-                    Text(
-                      "WELCOME\n${Constants.childData!.username}",
-                      style: Styles.semiBold20Style(context),
-                      textAlign: TextAlign.center,
-                    ),
-                    const Spacer(),
-                    _buildItem(context,
-                        state: refreshAppsState, text: "Refreshing apps Data"),
-                    SizedBox(height: 20.h),
-                    _buildItem(context,
-                        state: refreshLocationState,
-                        text: "Refreshing current location"),
-                    // SizedBox(height: 20.h),
-                    // HideAppCard(),
-                    const Spacer(flex: 2),
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: SizeConfig.screenWidth * 0.15),
-                      child: CustomElevatedButton(
-                          onPressed: () {
-                            _showPeriodicRefreshingDialog(context);
-                          },
-                          color: AppColors.veryDarkBlue,
-                          text: "Manage periodic refreshing"),
-                    ),
-                    SizedBox(height: 20.h),
-                    CustomElevatedButton(
-                        onPressed: () async {
-                          // BackgroundServices.getPermissions();
-                          if (refreshAppsState != MethodState.loading ||
-                              refreshLocationState != MethodState.loading) {
-                            _refreshData();
-                          }
+      appBar: AppBar(),
+      body: BlocProvider.value(
+        value: sl<ChildAppsCubit>(),
+        child: BlocBuilder<ChildAppsCubit, ChildAppsState>(
+          builder: (context, state) {
+            MethodState refreshAppsState =
+                ChildAppsCubit.get(context).refreshAppsDataState;
+            MethodState refreshLocationState =
+                ChildAppsCubit.get(context).refreshLocationState;
+            return Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(height: 10.h),
+                  const Row(
+                    children: [
+                      Spacer(),
+                      CustomLogOutButton(),
+                    ],
+                  ),
+                  SizedBox(height: 10.h),
+                  Text(
+                    "WELCOME\n${Constants.childData!.username}",
+                    style: Styles.semiBold20Style(context),
+                    textAlign: TextAlign.center,
+                  ),
+                  const Spacer(),
+                  _buildItem(context,
+                      state: refreshAppsState, text: "Refreshing Apps Data"),
+                  SizedBox(height: 20.h),
+                  _buildItem(context,
+                      state: refreshLocationState,
+                      text: "Refreshing Current Location"),
+                  const Spacer(flex: 2),
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: SizeConfig.screenWidth * 0.15),
+                    child: CustomElevatedButton(
+                        onPressed: () {
+                          _showPeriodicRefreshingDialog(context);
                         },
-                        text: "Refresh data"),
-                    const Spacer(flex: 2),
-                  ],
-                ),
-              );
-            },
-          ),
+                        color: AppColors.veryDarkBlue,
+                        text: "Manage periodic refreshing"),
+                  ),
+                  SizedBox(height: 20.h),
+                  CustomElevatedButton(
+                      onPressed: () async {
+                        if (refreshAppsState != MethodState.loading ||
+                            refreshLocationState != MethodState.loading) {
+                          _refreshData(context);
+                        }
+                      },
+                      text: "Refresh data"),
+                  const Spacer(flex: 2),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );
@@ -135,7 +130,6 @@ class _ChildrenViewState extends State<ChildrenView> {
           style: Styles.medium25Style(context, size: 16)
               .copyWith(color: Colors.black, letterSpacing: 1),
         )),
-        // const Spacer(),
         state == MethodState.loading
             ? const CircularProgressIndicator(color: AppColors.primaryColor)
             : state == MethodState.failed
@@ -145,13 +139,11 @@ class _ChildrenViewState extends State<ChildrenView> {
                         color: Colors.green, size: 30.sp)
                     : Icon(IconBroken.More_Circle,
                         color: AppColors.darkGray, size: 30.sp),
-        // Icon(IconBroken.Arrow___Right_2, size: 30.sp),
       ],
     ));
   }
 
   _showInfoDialog(BuildContext context) {
-    // set up the button
     Widget okButton = TextButton(
       child: Text(
         "OK",
@@ -161,18 +153,10 @@ class _ChildrenViewState extends State<ChildrenView> {
       onPressed: () async {
         CacheHelper.saveData(key: Constants.cachedPermissions, value: false);
         Navigator.pop(context);
-        await BackgroundServices.getPermissions().then((value) {
-          log("get permission success");
-          // _refreshData();
-        }).catchError((error) {
-          log("get permission failure");
-        });
-
-        // BackgroundServices.startPeriodicDataRefreshing();
+        await BackgroundServices.getUsageAccessAndAdminActivation();
       },
     );
 
-    // set up the AlertDialog
     AlertDialog alert = AlertDialog(
       surfaceTintColor: Colors.white,
       backgroundColor: Colors.white,
@@ -239,20 +223,7 @@ class _ChildrenViewState extends State<ChildrenView> {
         child: CustomElevatedButton(
       onPressed: () {
         Navigator.pop(context);
-        showModalBottomSheet(
-          shape: Constants.modalSheetDecoration(),
-          isScrollControlled: true,
-          context: context,
-          builder: (context) {
-            return PasswordBottomSheet(
-              actionTitle: "S T O P",
-              action: () {
-                Navigator.pop(context);
-                BackgroundServices.stopPeriodicTasks(context);
-              },
-            );
-          },
-        );
+        BackgroundServices.stopPeriodicTasks(context);
       },
       text: "Stop",
       color: Colors.red,
@@ -310,7 +281,6 @@ class _ChildrenViewState extends State<ChildrenView> {
       ],
     );
 
-    // show the dialog
     showDialog(
       // barrierDismissible: false,
       context: context,

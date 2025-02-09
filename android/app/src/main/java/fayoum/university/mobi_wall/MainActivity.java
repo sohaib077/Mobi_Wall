@@ -75,8 +75,8 @@ public class MainActivity extends FlutterActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         NotificationHelper.createNotificationChannel(this);
-        Intent serviceIntent = new Intent(this, AppUsageMonitorService.class);
-        this.stopService(serviceIntent);
+//        Intent serviceIntent = new Intent(this, AppUsageMonitorService.class);
+//        this.stopService(serviceIntent);
 
         SharedPreferences sharedPref = getSharedPreferences(PREFS_NAME, 0);
         boolean isLocked = sharedPref.getBoolean("locked", false);
@@ -108,12 +108,12 @@ public class MainActivity extends FlutterActivity {
         SharedPreferences sharedPref = getSharedPreferences(PREFS_NAME, 0);
         boolean isChild = sharedPref.getBoolean("isChild", false);
         if (isChild) {
-            Intent serviceIntent = new Intent(this, AppUsageMonitorService.class);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                this.startForegroundService(serviceIntent);
-            } else {
-                this.startService(serviceIntent);
-            }
+//            Intent serviceIntent = new Intent(this, AppUsageMonitorService.class);
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                this.startForegroundService(serviceIntent);
+//            } else {
+//                this.startService(serviceIntent);
+//            }
 
 
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -169,6 +169,7 @@ public class MainActivity extends FlutterActivity {
             } else if (call.method.equals("getUsageAccessPermission")) {
 
                 if (!isAccessGranted()) {
+                    System.out.println("requesting usage access");
                     Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
                     startActivity(intent);
                 }
@@ -177,8 +178,8 @@ public class MainActivity extends FlutterActivity {
 
             } else if (call.method.equals("blockUninstall")) {
 
+                System.out.println("requesting admin activation");
                 requestAdminActivation();
-
                 result.success(true);
 
             } else if (call.method.equals("stopPeriodicTasks")) {
@@ -243,9 +244,8 @@ public class MainActivity extends FlutterActivity {
             Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.ACCESS_BACKGROUND_LOCATION, Manifest.permission.PACKAGE_USAGE_STATS,
             Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, Manifest.permission.POST_NOTIFICATIONS,
-            Manifest.permission.PROCESS_OUTGOING_CALLS, Manifest.permission.RECEIVE_BOOT_COMPLETED,
-            Manifest.permission.READ_PHONE_STATE, Manifest.permission.CALL_PHONE,
-            Manifest.permission.READ_CALL_LOG, Manifest.permission.WRITE_CALL_LOG
+            Manifest.permission.RECEIVE_BOOT_COMPLETED, Manifest.permission.READ_CALL_LOG,
+            Manifest.permission.WRITE_CALL_LOG
     };
 
     private boolean isPermissionGranted(String permission) {
@@ -261,6 +261,7 @@ public class MainActivity extends FlutterActivity {
 
 
     private void requestPermissions() {
+        System.out.println("requesting permissions");
 //        requestAdminActivation();
         ActivityCompat.requestPermissions(this, permissions, PERMISSION_REQUEST_CODE);
     }
