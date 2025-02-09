@@ -95,7 +95,7 @@ dependencies:
 
   # Apps Data
   installed_apps: ^1.5.0
-  app_usage: ^3.0.1
+#  app_usage: ^3.0.1
 
   # Getting Location's latitude and longitude
   geolocator: ^11.0.0

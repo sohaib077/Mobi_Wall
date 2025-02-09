@@ -1,5 +1,4 @@
 import 'dart:developer';
-import 'package:app_usage/app_usage.dart';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -39,51 +38,45 @@ class ChildAppsCubit extends Cubit<ChildAppsState> {
 
       List<AppInfo> appsInfo = await InstalledApps.getInstalledApps(true, true);
 
-      appsInfo.forEach(
-        (app) {
-          log('app = ${app.name}');
-        },
-      );
-
       DateTime endDate = DateTime.now();
-      // get daily usage
-      DateTime startDate = endDate.subtract(const Duration(days: 1));
-      List<AppUsageInfo> dayInfoList =
-          await AppUsage().getAppUsage(startDate, endDate);
-      // get weekly usage
-      startDate = endDate.subtract(const Duration(days: 7));
-      List<AppUsageInfo> weekInfoList =
-          await AppUsage().getAppUsage(startDate, endDate);
-      // get monthly usage
-      startDate = endDate.subtract(const Duration(days: 30));
-      List<AppUsageInfo> monthInfoList =
-          await AppUsage().getAppUsage(startDate, endDate);
-
-      dayInfoList.forEach((element) {
-        dailyUsageMap[element.packageName] = element.usage;
-      });
-
-      weekInfoList.forEach((element) {
-        weeklyUsageMap[element.packageName] = element.usage;
-      });
-
-      monthInfoList.forEach((element) {
-        monthlyUsageMap[element.packageName] = element.usage;
-        lastOpenedMap[element.packageName] = element.lastForeground;
-      });
-
-      appsInfo.forEach((e) {
-        apps.add(
-          AppDataModel(
-            packageName: e.packageName,
-            name: e.name,
-            dailyUsage: dailyUsageMap[e.packageName],
-            weeklyUsage: weeklyUsageMap[e.packageName],
-            monthlyUsage: monthlyUsageMap[e.packageName],
-          ).toMap(),
-        );
-        log(apps.last.toString());
-      });
+      // // get daily usage
+      // DateTime startDate = endDate.subtract(const Duration(days: 1));
+      // List<AppUsageInfo> dayInfoList =
+      //     await AppUsage().getAppUsage(startDate, endDate);
+      // // get weekly usage
+      // startDate = endDate.subtract(const Duration(days: 7));
+      // List<AppUsageInfo> weekInfoList =
+      //     await AppUsage().getAppUsage(startDate, endDate);
+      // // get monthly usage
+      // startDate = endDate.subtract(const Duration(days: 30));
+      // List<AppUsageInfo> monthInfoList =
+      //     await AppUsage().getAppUsage(startDate, endDate);
+      //
+      // dayInfoList.forEach((element) {
+      //   dailyUsageMap[element.packageName] = element.usage;
+      // });
+      //
+      // weekInfoList.forEach((element) {
+      //   weeklyUsageMap[element.packageName] = element.usage;
+      // });
+      //
+      // monthInfoList.forEach((element) {
+      //   monthlyUsageMap[element.packageName] = element.usage;
+      //   lastOpenedMap[element.packageName] = element.lastForeground;
+      // });
+      //
+      // appsInfo.forEach((e) {
+      //   apps.add(
+      //     AppDataModel(
+      //       packageName: e.packageName,
+      //       name: e.name,
+      //       dailyUsage: dailyUsageMap[e.packageName],
+      //       weeklyUsage: weeklyUsageMap[e.packageName],
+      //       monthlyUsage: monthlyUsageMap[e.packageName],
+      //     ).toMap(),
+      //   );
+      //   log(apps.last.toString());
+      // });
     } catch (error) {
       log('error = $error');
       refreshAppsDataState = MethodState.failed;

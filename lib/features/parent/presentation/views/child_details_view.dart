@@ -2,13 +2,17 @@
 
 import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mobi_wall/core/functions/setup_service_locator.dart';
+import 'package:mobi_wall/core/helpers/extensions.dart';
 import 'package:mobi_wall/core/utils/app_colors.dart';
 import 'package:mobi_wall/core/utils/icon_broken.dart';
 import 'package:mobi_wall/core/utils/size_config.dart';
 import 'package:mobi_wall/core/widgets/custom_title_app_bar.dart';
 import 'package:mobi_wall/features/parent/data/models/child_data_model.dart';
+import 'package:mobi_wall/features/parent/presentation/manager/parent_cubit.dart';
 import 'package:mobi_wall/features/parent/presentation/views/widgets/block_url_floating_action_button.dart';
 import 'package:mobi_wall/features/parent/presentation/views/widgets/url_blocking_view.dart';
 import 'package:mobi_wall/features/parent/presentation/views/widgets/apps_list.dart';
@@ -84,33 +88,37 @@ class _ChildDetailsViewState extends State<ChildDetailsView>
     return Scaffold(
       floatingActionButton:
           currentPage == 3 ? const BlockUrlFloatingActionButton() : null,
-      body: SafeArea(
-        child: BottomBar(
-          width: SizeConfig.screenWidth * .6,
-          child: TabBar(
-            splashBorderRadius: BorderRadius.circular(radius),
-            dividerColor: Colors.transparent,
-            overlayColor:
-                WidgetStatePropertyAll(Colors.white.withOpacity(0.1)),
-            indicatorPadding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
-            controller: tabController,
-            indicator: UnderlineTabIndicator(
-              borderSide: const BorderSide(color: selectedColor, width: 2.5),
-              borderRadius: BorderRadius.circular(1.r),
-              insets: const EdgeInsets.fromLTRB(2, 0, 2, 8),
+      appBar: AppBar(),
+      body: BottomBar(
+        width: SizeConfig.screenWidth * .7,
+        child: TabBar(
+          splashBorderRadius: BorderRadius.circular(radius),
+          dividerColor: Colors.transparent,
+          overlayColor: WidgetStatePropertyAll(Colors.white.withOpacity(0.1)),
+          padding: EdgeInsets.symmetric(horizontal: 10.res(context)),
+          indicatorPadding: EdgeInsets.fromLTRB(12.res(context), 0, 0, 0),
+          controller: tabController,
+          indicator: UnderlineTabIndicator(
+            borderSide: BorderSide(
+              color: Colors.white,
+              width: 4.res(context),
             ),
-            tabs: [
-              // _buildIcon(icon: IconBroken.Activity, index: 1),
-              _buildIcon(icon: IconBroken.Location, index: 0),
-              _buildIcon(icon: IconBroken.Category, index: 1),
-              _buildIcon(icon: IconBroken.Call, index: 2),
-              _buildIcon(icon: Icons.network_check_rounded, index: 3),
-            ],
+            borderRadius: BorderRadius.circular(20.r),
+            insets: EdgeInsets.fromLTRB(0, 0, 0, 8.res(context)),
           ),
-          fit: StackFit.expand,
-          borderRadius: BorderRadius.circular(radius),
-          barColor: AppColors.veryDarkBlue,
-          body: (context, controller) => Padding(
+          tabs: [
+            _buildIcon(icon: IconBroken.Location, index: 0),
+            _buildIcon(icon: IconBroken.Category, index: 1),
+            _buildIcon(icon: IconBroken.Call, index: 2),
+            _buildIcon(icon: Icons.network_check_rounded, index: 3),
+          ],
+        ),
+        fit: StackFit.expand,
+        borderRadius: BorderRadius.circular(radius),
+        barColor: AppColors.veryDarkBlue,
+        body: (context, controller) => BlocProvider.value(
+          value: sl<ParentCubit>(),
+          child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.w),
             child: Column(
               children: [
@@ -133,10 +141,10 @@ class _ChildDetailsViewState extends State<ChildDetailsView>
     );
   }
 
-  SizedBox _buildIcon({required IconData icon, required int index}) {
+  Widget _buildIcon({required IconData icon, required int index}) {
     return SizedBox(
-      height: 55,
-      width: 40,
+      height: 60.res(context),
+      width: 45.res(context),
       child: Center(
           child: Icon(
         icon,
