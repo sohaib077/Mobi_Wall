@@ -5,5 +5,10 @@
         <reset-password />
         <wipe-data />
         <disable-keyguard-features />
+        <limit-password />
+        <watch-login />
+        <expire-password />
+        <encrypted-storage />
+        <disable-camera />
     </uses-policies>
 </device-admin>

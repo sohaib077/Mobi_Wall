@@ -1,10 +1,13 @@
 package fayoum.university.mobi_wall;
 
+import android.app.ActivityManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
+import android.app.admin.DevicePolicyManager;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -56,7 +59,7 @@ public class AppUsageMonitorService extends Service {
             public void run() {
                 String currentApp = getForegroundApp(getApplicationContext());
                 Log.d(TAG, "Current App Package: " + currentApp);
-                handler.postDelayed(this, 1000); // Run every 1 second
+                handler.postDelayed(this, 5000); // Run every 5 second
             }
         }, 0);
     }
@@ -93,29 +96,48 @@ public class AppUsageMonitorService extends Service {
                 foregroundApp = sortedMap.get(sortedMap.lastKey()).getPackageName();
             }
         }
-        if (set.contains(foregroundApp) || foregroundApp.contains("youtube")) {
+        if (set.contains(foregroundApp) || foregroundApp.contains("youtube") || foregroundApp.contains("com.google.android.apps.photos")) {
             System.out.println("trying to open mobiwall app");
 
-            SharedPreferences sharedPref = getApplicationContext().getSharedPreferences(MainActivity.PREFS_NAME, 0);
-            SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putBoolean("locked", true).apply();
-            launchApp(context, "fayoum.university.mobi_wall");
+//            SharedPreferences sharedPref = getApplicationContext().getSharedPreferences(MainActivity.PREFS_NAME, 0);
+//            SharedPreferences.Editor editor = sharedPref.edit();
+//            editor.putBoolean("locked", true).apply();
+//            launchApp();
+
+
+//            ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+//            Intent startMain = new Intent(Intent.ACTION_MAIN);
+//            startMain.addCategory(Intent.CATEGORY_HOME);
+//            startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//            this.startActivity(startMain);
+//            am.killBackgroundProcesses(foregroundApp);
+
+
+            Intent intent = new Intent(AppUsageMonitorService.this, BlockingActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+
+
+//            ComponentName adminComponent = new ComponentName(this, MyDeviceAdminReceiver.class);
+//            System.out.println("admin component = " + adminComponent);
+//            DevicePolicyManager dpm = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
+//            dpm.setApplicationHidden(adminComponent, foregroundApp, true);
         }
 
         return foregroundApp;
     }
 
 
-    private void launchApp(Context context, String packageName) {
+    private void launchApp() {
+        try {
 
-        Intent launchIntent = getPackageManager().getLaunchIntentForPackage(packageName);
-        if (launchIntent != null) {
+        Intent launchIntent = getPackageManager().getLaunchIntentForPackage(this.getPackageName());
+//            Intent launchIntent = new Intent(this, BlockingActivity.class);
             System.out.println("intent != null");
             launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(launchIntent);
-//        stopSelf(); // Stop the service after launching the app
-        } else {
-            Log.e(TAG, "Unable to launch app. Package name: " + packageName);
+            AppUsageMonitorService.this.startActivity(launchIntent);
+        } catch (Exception e) {
+            System.out.println("error while launching app = " + e);
         }
     }
 
@@ -140,4 +162,11 @@ public class AppUsageMonitorService extends Service {
 
         return builder.build();
     }
+
+//        public static String getForegroundApplication(Context context) {
+//            ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+//            ActivityManager.RunningTaskInfo foreground = am.getRunningTasks(1).get(0);
+//            return foreground.topActivity.getPackageName();
+//        }
+
 }
