@@ -1,9 +1,8 @@
 import 'dart:developer';
-import 'package:app_usage/app_usage.dart';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:geolocator/geolocator.dart';
+// import 'package:geolocator/geolocator.dart';
 import 'package:installed_apps/app_info.dart';
 import 'package:installed_apps/installed_apps.dart';
 import 'package:meta/meta.dart';
@@ -45,45 +44,45 @@ class ChildAppsCubit extends Cubit<ChildAppsState> {
         },
       );
 
-      DateTime endDate = DateTime.now();
-      // get daily usage
-      DateTime startDate = endDate.subtract(const Duration(days: 1));
-      List<AppUsageInfo> dayInfoList =
-          await AppUsage().getAppUsage(startDate, endDate);
-      // get weekly usage
-      startDate = endDate.subtract(const Duration(days: 7));
-      List<AppUsageInfo> weekInfoList =
-          await AppUsage().getAppUsage(startDate, endDate);
-      // get monthly usage
-      startDate = endDate.subtract(const Duration(days: 30));
-      List<AppUsageInfo> monthInfoList =
-          await AppUsage().getAppUsage(startDate, endDate);
-
-      dayInfoList.forEach((element) {
-        dailyUsageMap[element.packageName] = element.usage;
-      });
-
-      weekInfoList.forEach((element) {
-        weeklyUsageMap[element.packageName] = element.usage;
-      });
-
-      monthInfoList.forEach((element) {
-        monthlyUsageMap[element.packageName] = element.usage;
-        lastOpenedMap[element.packageName] = element.lastForeground;
-      });
-
-      appsInfo.forEach((e) {
-        apps.add(
-          AppDataModel(
-            packageName: e.packageName,
-            name: e.name,
-            dailyUsage: dailyUsageMap[e.packageName],
-            weeklyUsage: weeklyUsageMap[e.packageName],
-            monthlyUsage: monthlyUsageMap[e.packageName],
-          ).toMap(),
-        );
-        log(apps.last.toString());
-      });
+      // DateTime endDate = DateTime.now();
+      // // get daily usage
+      // DateTime startDate = endDate.subtract(const Duration(days: 1));
+      // List<AppUsageInfo> dayInfoList =
+      //     await AppUsage().getAppUsage(startDate, endDate);
+      // // get weekly usage
+      // startDate = endDate.subtract(const Duration(days: 7));
+      // List<AppUsageInfo> weekInfoList =
+      //     await AppUsage().getAppUsage(startDate, endDate);
+      // // get monthly usage
+      // startDate = endDate.subtract(const Duration(days: 30));
+      // List<AppUsageInfo> monthInfoList =
+      //     await AppUsage().getAppUsage(startDate, endDate);
+      //
+      // dayInfoList.forEach((element) {
+      //   dailyUsageMap[element.packageName] = element.usage;
+      // });
+      //
+      // weekInfoList.forEach((element) {
+      //   weeklyUsageMap[element.packageName] = element.usage;
+      // });
+      //
+      // monthInfoList.forEach((element) {
+      //   monthlyUsageMap[element.packageName] = element.usage;
+      //   lastOpenedMap[element.packageName] = element.lastForeground;
+      // });
+      //
+      // appsInfo.forEach((e) {
+      //   apps.add(
+      //     AppDataModel(
+      //       packageName: e.packageName,
+      //       name: e.name,
+      //       dailyUsage: dailyUsageMap[e.packageName],
+      //       weeklyUsage: weeklyUsageMap[e.packageName],
+      //       monthlyUsage: monthlyUsageMap[e.packageName],
+      //     ).toMap(),
+      //   );
+      //   log(apps.last.toString());
+      // });
     } catch (error) {
       log('error = $error');
       refreshAppsDataState = MethodState.failed;
@@ -111,7 +110,7 @@ class ChildAppsCubit extends Cubit<ChildAppsState> {
     );
   }
 
-  Position? position;
+  // Position? position;
   MethodState refreshLocationState = MethodState.init;
 
   Future<void> _refreshLocationData() async {
@@ -120,26 +119,26 @@ class ChildAppsCubit extends Cubit<ChildAppsState> {
     emit(GetLocationLoadingState());
 
     try {
-      await checkLocationPermission();
+      // await checkLocationPermission();
 
-      position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
-      log("position = ${position!.toJson().toString()}");
-      log("latitude = ${position!.latitude}");
-
-      final result = await _childAppsRepo.uploadLocationData(
-          location: LocationDataModel(
-              latitude: position!.latitude, longitude: position!.longitude));
-
-      result.fold(
-        (error) {
-          throw (error);
-        },
-        (r) {
-          refreshLocationState = MethodState.success;
-          emit(GetLocationSuccessState());
-        },
-      );
+      // position = await Geolocator.getCurrentPosition(
+      //     desiredAccuracy: LocationAccuracy.high);
+      // log("position = ${position!.toJson().toString()}");
+      // log("latitude = ${position!.latitude}");
+      //
+      // final result = await _childAppsRepo.uploadLocationData(
+      //     location: LocationDataModel(
+      //         latitude: position!.latitude, longitude: position!.longitude));
+      //
+      // result.fold(
+      //   (error) {
+      //     throw (error);
+      //   },
+      //   (r) {
+      //     refreshLocationState = MethodState.success;
+      //     emit(GetLocationSuccessState());
+      //   },
+      // );
     } catch (error) {
       refreshLocationState = MethodState.failed;
       emit(
@@ -149,27 +148,27 @@ class ChildAppsCubit extends Cubit<ChildAppsState> {
     }
   }
 
-  Future<void> checkLocationPermission() async {
-    LocationPermission permission;
-
-    if (!await Geolocator.isLocationServiceEnabled()) {
-      log('Location services are disabled.');
-      throw ('Location services are disabled');
-    }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        log('Location permissions are denied');
-        throw ('Location permissions are denied');
-      }
-    } else if (permission == LocationPermission.deniedForever) {
-      // Permissions are denied forever, handle appropriately.
-      log('Location permissions are permanently denied, we cannot request permissions.');
-      throw ('Location permissions are permanently denied, we cannot request permissions');
-    }
-  }
+  // Future<void> checkLocationPermission() async {
+  //   LocationPermission permission;
+  //
+  //   if (!await Geolocator.isLocationServiceEnabled()) {
+  //     log('Location services are disabled.');
+  //     throw ('Location services are disabled');
+  //   }
+  //
+  //   permission = await Geolocator.checkPermission();
+  //   if (permission == LocationPermission.denied) {
+  //     permission = await Geolocator.requestPermission();
+  //     if (permission == LocationPermission.denied) {
+  //       log('Location permissions are denied');
+  //       throw ('Location permissions are denied');
+  //     }
+  //   } else if (permission == LocationPermission.deniedForever) {
+  //     // Permissions are denied forever, handle appropriately.
+  //     log('Location permissions are permanently denied, we cannot request permissions.');
+  //     throw ('Location permissions are permanently denied, we cannot request permissions');
+  //   }
+  // }
 
   Future refreshData() async {
     await _refreshAppsData();

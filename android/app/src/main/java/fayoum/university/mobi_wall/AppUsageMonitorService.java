@@ -40,7 +40,6 @@ public class AppUsageMonitorService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        System.out.println("AppUsageMonitorService started");
         handler = new Handler(Looper.getMainLooper());
         startAppUsageMonitoring();
         startForeground(NOTIFICATION_ID, createNotification());
@@ -54,10 +53,12 @@ public class AppUsageMonitorService extends Service {
     }
 
     private void startAppUsageMonitoring() {
+        stopAppUsageMonitoring();
+        System.out.println("AppUsageMonitorService started");
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                String currentApp = getForegroundApp(getApplicationContext());
+                String currentApp = checkForBlockedApps();
                 Log.d(TAG, "Current App Package: " + currentApp);
                 handler.postDelayed(this, 5000); // Run every 5 second
             }
@@ -65,8 +66,13 @@ public class AppUsageMonitorService extends Service {
     }
 
     private void stopAppUsageMonitoring() {
-        handler.removeCallbacksAndMessages(null);
-        stopForeground(true);
+        System.out.println("Trying to stop app usage monitor service");
+        try {
+            handler.removeCallbacksAndMessages(null);
+            stopForeground(true);
+        } catch (Exception e) {
+            Log.e(TAG, "error while stopping app usage monitor service = " + e);
+        }
     }
 
     @Nullable
@@ -75,71 +81,86 @@ public class AppUsageMonitorService extends Service {
         return null;
     }
 
-    private String getForegroundApp(Context context) {
 
+    private String checkForBlockedApps() {
+        Set<String> blockedApps = getBlockedApps();
         String foregroundApp = "";
-        SharedPreferences sharedPref1 = getSharedPreferences("cachedBlockedApps", 0);
-        Set<String> set = new HashSet<>();
-        set = sharedPref1.getStringSet("blockedApps", new HashSet<>());
-
-        long endTime = System.currentTimeMillis();
-        long startTime = endTime - 10000; // Look for app usage in the last 10 seconds
-
-        UsageStatsManager usageStatsManager = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
-        List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_BEST, startTime, endTime);
-        if (usageStatsList != null && !usageStatsList.isEmpty()) {
-            SortedMap<Long, UsageStats> sortedMap = new TreeMap<>();
-            for (UsageStats usageStats : usageStatsList) {
-                sortedMap.put(usageStats.getLastTimeUsed(), usageStats);
-            }
-            if (!sortedMap.isEmpty()) {
-                foregroundApp = sortedMap.get(sortedMap.lastKey()).getPackageName();
+        ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningAppProcessInfo> processes = am.getRunningAppProcesses();
+        for (ActivityManager.RunningAppProcessInfo process : processes) {
+            System.out.println("process = " + process.pkgList[0]);
+            if (process.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
+                String packageName = process.pkgList[0];
+                foregroundApp = packageName;
+                if (blockedApps.contains(packageName)) {
+                    blockApp();
+                }
             }
         }
-        if (set.contains(foregroundApp) || foregroundApp.contains("youtube") || foregroundApp.contains("com.google.android.apps.photos")) {
-            System.out.println("trying to open mobiwall app");
-
-//            SharedPreferences sharedPref = getApplicationContext().getSharedPreferences(MainActivity.PREFS_NAME, 0);
-//            SharedPreferences.Editor editor = sharedPref.edit();
-//            editor.putBoolean("locked", true).apply();
-//            launchApp();
-
-
-//            ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-//            Intent startMain = new Intent(Intent.ACTION_MAIN);
-//            startMain.addCategory(Intent.CATEGORY_HOME);
-//            startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//            this.startActivity(startMain);
-//            am.killBackgroundProcesses(foregroundApp);
-
-
-            Intent intent = new Intent(AppUsageMonitorService.this, BlockingActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-
-
-//            ComponentName adminComponent = new ComponentName(this, MyDeviceAdminReceiver.class);
-//            System.out.println("admin component = " + adminComponent);
-//            DevicePolicyManager dpm = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
-//            dpm.setApplicationHidden(adminComponent, foregroundApp, true);
-        }
-
         return foregroundApp;
     }
 
-
-    private void launchApp() {
-        try {
-
-        Intent launchIntent = getPackageManager().getLaunchIntentForPackage(this.getPackageName());
-//            Intent launchIntent = new Intent(this, BlockingActivity.class);
-            System.out.println("intent != null");
-            launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            AppUsageMonitorService.this.startActivity(launchIntent);
-        } catch (Exception e) {
-            System.out.println("error while launching app = " + e);
-        }
+    private Set<String> getBlockedApps() {
+        SharedPreferences sharedPref1 = getSharedPreferences("cachedBlockedApps", 0);
+        return sharedPref1.getStringSet("blockedApps", new HashSet<>());
     }
+
+    private void blockApp() {
+        Intent intent = new Intent(AppUsageMonitorService.this, BlockingActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+    }
+
+//    private String getForegroundApp(Context context) {
+//
+//        String foregroundApp = "";
+//        SharedPreferences sharedPref1 = getSharedPreferences("cachedBlockedApps", 0);
+//        Set<String> set = new HashSet<>();
+//        set = sharedPref1.getStringSet("blockedApps", new HashSet<>());
+//
+//        long endTime = System.currentTimeMillis();
+//        long startTime = endTime - 10000; // Look for app usage in the last 10 seconds
+//
+//        UsageStatsManager usageStatsManager = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
+//        List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_BEST, startTime, endTime);
+//        if (usageStatsList != null && !usageStatsList.isEmpty()) {
+//            SortedMap<Long, UsageStats> sortedMap = new TreeMap<>();
+//            for (UsageStats usageStats : usageStatsList) {
+//
+//                sortedMap.put(usageStats.getLastTimeUsed(), usageStats);
+//            }
+//            if (!sortedMap.isEmpty()) {
+//                foregroundApp = sortedMap.get(sortedMap.lastKey()).getPackageName();
+//            }
+//        }
+//
+//        if (set.contains(foregroundApp) || foregroundApp.contains("youtube")) {
+//            System.out.println("trying to open mobiwall app");
+//
+//
+//            Intent intent = new Intent(AppUsageMonitorService.this, BlockingActivity.class);
+//            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+//            startActivity(intent);
+//
+//
+//        }
+//
+//        return foregroundApp;
+//    }
+
+
+//    private void launchApp() {
+//        try {
+//
+//            Intent launchIntent = getPackageManager().getLaunchIntentForPackage(this.getPackageName());
+////            Intent launchIntent = new Intent(this, BlockingActivity.class);
+//            System.out.println("intent != null");
+//            launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//            AppUsageMonitorService.this.startActivity(launchIntent);
+//        } catch (Exception e) {
+//            System.out.println("error while launching app = " + e);
+//        }
+//    }
 
 
     private Notification createNotification() {
@@ -163,10 +184,25 @@ public class AppUsageMonitorService extends Service {
         return builder.build();
     }
 
-//        public static String getForegroundApplication(Context context) {
-//            ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-//            ActivityManager.RunningTaskInfo foreground = am.getRunningTasks(1).get(0);
-//            return foreground.topActivity.getPackageName();
-//        }
-
 }
+
+/*
+
+//            SharedPreferences sharedPref = getApplicationContext().getSharedPreferences(MainActivity.PREFS_NAME, 0);
+//            SharedPreferences.Editor editor = sharedPref.edit();
+//            editor.putBoolean("locked", true).apply();
+//            launchApp();
+
+//            ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+//            Intent startMain = new Intent(Intent.ACTION_MAIN);
+//            startMain.addCategory(Intent.CATEGORY_HOME);
+//            startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//            this.startActivity(startMain);
+//            am.killBackgroundProcesses(foregroundApp);
+
+//            ComponentName adminComponent = new ComponentName(this, MyDeviceAdminReceiver.class);
+//            System.out.println("admin component = " + adminComponent);
+//            DevicePolicyManager dpm = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
+//            dpm.setApplicationHidden(adminComponent, foregroundApp, true);
+
+ */

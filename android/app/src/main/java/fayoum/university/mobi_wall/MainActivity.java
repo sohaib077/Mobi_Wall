@@ -25,9 +25,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.work.Constraints;
 import androidx.work.Data;
 import androidx.work.ExistingPeriodicWorkPolicy;
@@ -64,20 +61,43 @@ public class MainActivity extends FlutterActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         NotificationHelper.createNotificationChannel(this);
-        Intent serviceIntent = new Intent(this, AppUsageMonitorService.class);
-        this.stopService(serviceIntent);
+        stopAppUsageMonitorService();
+        stopMyAccessibilityService();
 
-        SharedPreferences sharedPref = getSharedPreferences(PREFS_NAME, 0);
+        // Open accessibility settings
+//        Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+//        startActivity(intent);
 
-        boolean isLocked = sharedPref.getBoolean("locked", false);
-        if (isLocked) {
-            setContentView(R.layout.activity_lock);
-            sharedPref.edit().putBoolean("locked", false).apply();
-            ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-                v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-                return insets;
-            });
+//        SharedPreferences sharedPref = getSharedPreferences(PREFS_NAME, 0);
+//        boolean isLocked = sharedPref.getBoolean("locked", false);
+//        if (isLocked) {
+//            setContentView(R.layout.activity_lock);
+//            sharedPref.edit().putBoolean("locked", false).apply();
+//            ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+//                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+//                v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+//                return insets;
+//            });
+//        }
+    }
+
+    void stopAppUsageMonitorService() {
+        try {
+            System.out.println("stopping app usage monitor service");
+            Intent serviceIntent = new Intent(this, AppUsageMonitorService.class);
+            this.stopService(serviceIntent);
+        } catch (Exception e) {
+            System.out.println("error stopping app usage monitor service = " + e);
+        }
+    }
+
+    void stopMyAccessibilityService() {
+        try {
+            System.out.println("stopping my accessibility service");
+            Intent serviceIntent = new Intent(this, ForegroundAppsAccessibilityService.class);
+            this.stopService(serviceIntent);
+        } catch (Exception e) {
+            System.out.println("error stopping app my accessibility service = " + e);
         }
     }
 
@@ -98,11 +118,16 @@ public class MainActivity extends FlutterActivity {
         SharedPreferences sharedPref = getSharedPreferences(PREFS_NAME, 0);
         boolean isChild = sharedPref.getBoolean("isChild", false);
         if (isChild) {
-            Intent serviceIntent = new Intent(this, AppUsageMonitorService.class);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                this.startForegroundService(serviceIntent);
-            } else {
-                this.startService(serviceIntent);
+            try {
+                System.out.println("Starting my accessibility service");
+                Intent serviceIntent = new Intent(this, ForegroundAppsAccessibilityService.class);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    this.startForegroundService(serviceIntent);
+                } else {
+                    this.startService(serviceIntent);
+                }
+            } catch (Exception e) {
+                System.out.println("error starting my accessibility service = " + e);
             }
 
 
@@ -154,6 +179,9 @@ public class MainActivity extends FlutterActivity {
             } else if (call.method.equals("getPermissions")) {
 
                 if (!areAllPermissionsGranted()) requestPermissions();
+
+                openAccessibilitySettings();
+
                 result.success(true);
 
             } else if (call.method.equals("getUsageAccessPermission")) {
@@ -178,13 +206,23 @@ public class MainActivity extends FlutterActivity {
                 dataBuilder.putBoolean("isChild", false);
                 WorkManager.getInstance(this).cancelAllWork();
                 removeAdminActivation();
-
+                stopAppUsageMonitorService();
+                stopMyAccessibilityService();
                 result.success("Periodic data refreshing is cancelled successfully");
 
             } else {
                 result.notImplemented();
             }
         });
+    }
+
+    private void openAccessibilitySettings() {
+        if (!ForegroundAppsAccessibilityService.isAccessibilityServiceEnabled(this, ForegroundAppsAccessibilityService.class)) {
+            Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+            startActivity(intent);
+        } else {
+            System.out.println("Accessibility service is already enabled");
+        }
     }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -316,8 +354,12 @@ public class MainActivity extends FlutterActivity {
     }
 
     private void removeAdminActivation() {
-        DevicePolicyManager dpm = (DevicePolicyManager) this.getSystemService(Context.DEVICE_POLICY_SERVICE);
-        dpm.clearDeviceOwnerApp(this.getPackageName());
+        try {
+            DevicePolicyManager dpm = (DevicePolicyManager) this.getSystemService(Context.DEVICE_POLICY_SERVICE);
+            dpm.clearDeviceOwnerApp(this.getPackageName());
+        } catch (Exception e) {
+            System.out.println("error removing admin activation = " + e);
+        }
     }
 
     @Override
