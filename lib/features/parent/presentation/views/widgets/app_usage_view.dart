@@ -30,13 +30,9 @@ class _AppUsageViewState extends State<AppUsageView> {
   int index = 0;
 
   double getPercent() {
-    if (index == 0) {
-      return widget.app.dailyUsage!.inMinutes / (24 * 60);
-    } else if (index == 1) {
-      return widget.app.weeklyUsage!.inMinutes / (24 * 7 * 60);
-    } else {
-      return widget.app.monthlyUsage!.inMinutes / (30 * 24 * 60);
-    }
+    if (index == 0) return widget.app.dailyUsage!.inMinutes / (24 * 60);
+    if (index == 1) return widget.app.weeklyUsage!.inMinutes / (24 * 7 * 60);
+    return widget.app.monthlyUsage!.inMinutes / (30 * 24 * 60);
   }
 
   @override
