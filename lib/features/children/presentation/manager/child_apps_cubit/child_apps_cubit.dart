@@ -38,13 +38,14 @@ class ChildAppsCubit extends Cubit<ChildAppsState> {
 
       List<AppInfo> appsInfo = await InstalledApps.getInstalledApps(true, true);
 
-      appsInfo.forEach(
-        (app) {
-          log('app = ${app.name}');
-        },
-      );
+      // appsInfo.forEach(
+      //   (app) {
+      //     log('app = ${app.name}');
+      //   },
+      // );
 
       // DateTime endDate = DateTime.now();
+
       // // get daily usage
       // DateTime startDate = endDate.subtract(const Duration(days: 1));
       // List<AppUsageInfo> dayInfoList =

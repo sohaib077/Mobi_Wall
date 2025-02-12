@@ -38,27 +38,31 @@ class AppsList extends StatelessWidget {
                   },
                   child: Column(
                     children: [
-                      const CustomCard(
-                              child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [Text("Tap here to save the changes")],
-                      ))
-                          .animate(
-                            target:
-                                ParentCubit.get(context).isBlockedAppsChanged
-                                    ? 1
-                                    : 0,
-                            onComplete: (controller) {
-                              if (!ParentCubit.get(context)
-                                  .isBlockedAppsChanged)
-                                ParentCubit.get(context).changeShowSaveButton();
-                            },
-                          )
-                          .scale(
-                              // begin: ParentCubit.get(context).isBlockedAppsChanged ?  0 : 1,
-                              // end: ParentCubit.get(context).isBlockedAppsChanged ?  1 : 0,
-                              duration: 800.ms,
-                              curve: Curves.easeInOut),
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: 10.h),
+                        child: const CustomCard(
+                                child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [Text("Tap here to save the changes")],
+                        ))
+                            .animate(
+                              target:
+                                  ParentCubit.get(context).isBlockedAppsChanged
+                                      ? 1
+                                      : 0,
+                              onComplete: (controller) {
+                                if (!ParentCubit.get(context)
+                                    .isBlockedAppsChanged)
+                                  ParentCubit.get(context)
+                                      .changeShowSaveButton();
+                              },
+                            )
+                            .scale(
+                                // begin: ParentCubit.get(context).isBlockedAppsChanged ?  0 : 1,
+                                // end: ParentCubit.get(context).isBlockedAppsChanged ?  1 : 0,
+                                duration: 800.ms,
+                                curve: Curves.easeInOut),
+                      ),
                       if (ParentCubit.get(context).updateBlockedAppsState ==
                           MethodState.loading)
                         Padding(
@@ -86,7 +90,7 @@ class AppsList extends StatelessWidget {
                         itemBuilder: (context, index) {
                           return apps![index]
                                   .packageName
-                                  .contains("com.example.mobiwall")
+                                  .contains("fayoum.university.mobi_wall")
                               ? const SizedBox()
                               : Padding(
                                   padding: EdgeInsets.only(
