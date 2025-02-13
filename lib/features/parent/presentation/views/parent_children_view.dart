@@ -29,15 +29,11 @@ class _ParentChildrenViewState extends State<ParentChildrenView> {
   @override
   void initState() {
     super.initState();
-    // if (ParentCubit.get(context).children.isEmpty) {
-    //   ParentCubit.get(context).getChildren().then((value) {
-    //     FirebaseService().updateUserToken().then((value) {
-    //       log("parent token is updated successfully and token = \n$value");
-    //     }).catchError((error) {
-    //       log("Error while updating parent token : $error");
-    //     });
-    //   });
-    // }
+    FirebaseService().updateUserToken().then((value) {
+      log("parent token is updated successfully and token = \n$value");
+    }).catchError((error) {
+      log("Error while updating parent token : $error");
+    });
   }
 
   @override
@@ -48,7 +44,8 @@ class _ParentChildrenViewState extends State<ParentChildrenView> {
       body: BlocProvider.value(
         value: sl<ParentCubit>()..getChildren(),
         child: SingleChildScrollView(
-          physics:  const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+          physics: const BouncingScrollPhysics(
+              parent: AlwaysScrollableScrollPhysics()),
           padding: EdgeInsets.symmetric(horizontal: 16.w),
           child: BlocConsumer<ParentCubit, ParentState>(
             listener: (context, state) => _listener(context, state),
@@ -85,8 +82,7 @@ class _ParentChildrenViewState extends State<ParentChildrenView> {
   }
 
   _listener(BuildContext context, ParentState state) {
-    if (state is GetChildrenFailureState ||
-        state is AddChildFailureState ) {
+    if (state is GetChildrenFailureState || state is AddChildFailureState) {
       showAlertDialog(context, description: (state as dynamic).message);
     }
   }
