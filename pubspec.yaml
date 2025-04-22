@@ -82,6 +82,8 @@ dependencies:
   # Notification Packages:
   firebase_messaging: ^15.2.1
   http: ^1.3.0
+  googleapis_auth: ^1.6.0
+  flutter_local_notifications: ^18.0.1
 
   flutter_screenutil: ^5.9.3
   font_awesome_flutter: ^10.7.0
@@ -98,7 +100,7 @@ dependencies:
 #  app_usage: ^3.0.1
 
   # Getting Location's latitude and longitude
-  geolocator: ^11.0.0
+#  geolocator: ^11.0.0
 
   # Getting Location details from latitude and longitude
   geocode: ^1.0.3
@@ -141,8 +143,7 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/lotties/
-
-
+    - assets/notifications_key/mobiwall-43f95-ca076616cced.json
 
   fonts:
     - family: poppins

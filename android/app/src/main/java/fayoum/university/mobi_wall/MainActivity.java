@@ -10,7 +10,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 
-import io.flutter.embedding.android.FlutterActivity;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
@@ -18,20 +17,15 @@ import io.flutter.plugin.common.MethodChannel;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.net.VpnService;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.work.Constraints;
 import androidx.work.Data;
 import androidx.work.ExistingPeriodicWorkPolicy;
@@ -40,17 +34,10 @@ import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.messaging.FirebaseMessaging;
 
 public class MainActivity extends FlutterActivity {
 
@@ -75,19 +62,45 @@ public class MainActivity extends FlutterActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         NotificationHelper.createNotificationChannel(this);
-//        Intent serviceIntent = new Intent(this, AppUsageMonitorService.class);
-//        this.stopService(serviceIntent);
+        stopAppUsageMonitorService();
+        stopMyAccessibilityService();
 
-        SharedPreferences sharedPref = getSharedPreferences(PREFS_NAME, 0);
-        boolean isLocked = sharedPref.getBoolean("locked", false);
-        if (isLocked) {
-            setContentView(R.layout.activity_lock);
-            sharedPref.edit().putBoolean("locked", false).apply();
-            ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-                v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-                return insets;
-            });
+        vpnPermission();
+
+        // Open accessibility settings
+//        Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+//        startActivity(intent);
+
+//        SharedPreferences sharedPref = getSharedPreferences(PREFS_NAME, 0);
+//        boolean isLocked = sharedPref.getBoolean("locked", false);
+//        if (isLocked) {
+//            setContentView(R.layout.activity_lock);
+//            sharedPref.edit().putBoolean("locked", false).apply();
+//            ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+//                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+//                v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+//                return insets;
+//            });
+//        }
+    }
+
+    void stopAppUsageMonitorService() {
+        try {
+            System.out.println("stopping app usage monitor service");
+            Intent serviceIntent = new Intent(this, AppUsageMonitorService.class);
+            this.stopService(serviceIntent);
+        } catch (Exception e) {
+            System.out.println("error stopping app usage monitor service = " + e);
+        }
+    }
+
+    void stopMyAccessibilityService() {
+        try {
+            System.out.println("stopping my accessibility service");
+            Intent serviceIntent = new Intent(this, ForegroundAppsAccessibilityService.class);
+            this.stopService(serviceIntent);
+        } catch (Exception e) {
+            System.out.println("error stopping app my accessibility service = " + e);
         }
     }
 
@@ -108,12 +121,17 @@ public class MainActivity extends FlutterActivity {
         SharedPreferences sharedPref = getSharedPreferences(PREFS_NAME, 0);
         boolean isChild = sharedPref.getBoolean("isChild", false);
         if (isChild) {
-//            Intent serviceIntent = new Intent(this, AppUsageMonitorService.class);
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//                this.startForegroundService(serviceIntent);
-//            } else {
-//                this.startService(serviceIntent);
-//            }
+            try {
+                System.out.println("Starting my accessibility service");
+                Intent serviceIntent = new Intent(this, ForegroundAppsAccessibilityService.class);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    this.startForegroundService(serviceIntent);
+                } else {
+                    this.startService(serviceIntent);
+                }
+            } catch (Exception e) {
+                System.out.println("error starting my accessibility service = " + e);
+            }
 
 
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -164,6 +182,9 @@ public class MainActivity extends FlutterActivity {
             } else if (call.method.equals("getPermissions")) {
 
                 if (!areAllPermissionsGranted()) requestPermissions();
+
+                openAccessibilitySettings();
+
                 result.success(true);
 
             } else if (call.method.equals("getUsageAccessPermission")) {
@@ -187,6 +208,9 @@ public class MainActivity extends FlutterActivity {
                 Data.Builder dataBuilder = new Data.Builder();
                 dataBuilder.putBoolean("isChild", false);
                 WorkManager.getInstance(this).cancelAllWork();
+                removeAdminActivation();
+                stopAppUsageMonitorService();
+                stopMyAccessibilityService();
                 result.success("Periodic data refreshing is cancelled successfully");
 
             } else {
@@ -195,6 +219,35 @@ public class MainActivity extends FlutterActivity {
         });
     }
 
+    private void openAccessibilitySettings() {
+        if (!ForegroundAppsAccessibilityService.isAccessibilityServiceEnabled(this, ForegroundAppsAccessibilityService.class)) {
+            Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+            startActivity(intent);
+        } else {
+            System.out.println("Accessibility service is already enabled");
+        }
+    }
+
+    private void vpnPermission() {
+        Intent intent = VpnService.prepare(this);
+        if (intent != null) {
+            startActivityForResult(intent, VPN_REQUEST_CODE);
+        } else {
+            startVpnService();
+        }
+    }
+
+    private void startVpnService() {
+        // Create an intent to start your VPN service
+        Intent intent = new Intent(this, BlockingVpnService.class);
+        System.out.println("starting vpn service");
+        // Start the service (use startForegroundService for Android 8.0+)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(intent);
+        } else {
+            startService(intent);
+        }
+    }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -245,7 +298,7 @@ public class MainActivity extends FlutterActivity {
             Manifest.permission.ACCESS_BACKGROUND_LOCATION, Manifest.permission.PACKAGE_USAGE_STATS,
             Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, Manifest.permission.POST_NOTIFICATIONS,
             Manifest.permission.RECEIVE_BOOT_COMPLETED, Manifest.permission.READ_CALL_LOG,
-            Manifest.permission.WRITE_CALL_LOG
+            Manifest.permission.WRITE_CALL_LOG, Manifest.permission.KILL_BACKGROUND_PROCESSES,
     };
 
     private boolean isPermissionGranted(String permission) {
@@ -321,6 +374,15 @@ public class MainActivity extends FlutterActivity {
         adb -s emulator-5558 shell dpm remove-active-admin fayoum.university.mobi_wall/.MyDeviceAdminReceiver
          */
 
+    }
+
+    private void removeAdminActivation() {
+        try {
+            DevicePolicyManager dpm = (DevicePolicyManager) this.getSystemService(Context.DEVICE_POLICY_SERVICE);
+            dpm.clearDeviceOwnerApp(this.getPackageName());
+        } catch (Exception e) {
+            System.out.println("error removing admin activation = " + e);
+        }
     }
 
     @Override

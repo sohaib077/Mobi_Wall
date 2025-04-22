@@ -1,6 +1,8 @@
 package fayoum.university.mobi_wall;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.util.Log;
+
 import androidx.annotation.RequiresApi;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -13,19 +15,18 @@ import java.util.Set;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
-
+    final String TAG = "MyMessagingService";
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
-
         SharedPreferences sharedPref = getSharedPreferences("cachedBlockedApps", 0);
         SharedPreferences.Editor editor = sharedPref.edit();
 
-        System.out.println("receiving a message");
+        Log.i(TAG,"receiving a message");
 
         // Check if message contains a data payload.
         if (!remoteMessage.getData().isEmpty()) {
-            System.out.println("Message data payload: " + remoteMessage.getData());
+            Log.i(TAG,"Message data payload: " + remoteMessage.getData());
 
 
             if (Objects.equals(remoteMessage.getData().get("updateBlockedApps"), "true")) {
@@ -33,22 +34,18 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 Set<String> set = new HashSet<>();
                 if (blockedAppsString != null && blockedAppsString.length() > 2) {
                     blockedAppsString = blockedAppsString.substring(1, blockedAppsString.length() - 1);
-
                     List<String> blockedAppsList = new ArrayList<String>(Arrays.asList(blockedAppsString.split(",")));
-                    System.out.println("blocked list length " + blockedAppsList.size());
-                    for (String s : blockedAppsList) {
-                        set.add(s.substring(1, s.length() - 1));
-                    }
+                    set.addAll(blockedAppsList);
 
                 }
+                Log.i(TAG,"set = " + set);
                 editor.putStringSet("blockedApps", set).apply();
-                set = sharedPref.getStringSet("blockedApps", new HashSet<>());
             }
         }
 
         // Check if message contains a notification payload.
         if (remoteMessage.getNotification() != null) {
-            System.out.println("Message Notification title : " + remoteMessage.getNotification().getTitle());
+            Log.i(TAG,"Message Notification title : " + remoteMessage.getNotification().getTitle());
             NotificationHelper.createNotificationChannel(this);
             NotificationHelper.sendNotification(this, remoteMessage.getNotification().getTitle(), remoteMessage.getNotification().getBody());
         }

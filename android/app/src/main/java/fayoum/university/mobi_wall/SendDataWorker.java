@@ -1,18 +1,22 @@
 package fayoum.university.mobi_wall;
+
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
+
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -71,9 +75,7 @@ public class SendDataWorker extends Worker {
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void SendData(Context context, String id, String childName) {
 
-
         System.out.println("Sending Data...");
-
 
         /* Getting location details  */
         Map<String, Double> address = new HashMap<>();
@@ -98,7 +100,6 @@ public class SendDataWorker extends Worker {
             System.out.println("Permission is required");
         }
 
-
         ///////////////////////////////////////////////////////////////////////////////////////////////////
 
         /* Getting apps details  */
@@ -107,16 +108,10 @@ public class SendDataWorker extends Worker {
         /* Getting calls details  */
         List<Map<String, Object>> calls = new CallLogs(context).getRecentCalls();
 
-
         System.out.println("apps length " + apps.size());
         System.out.println("address = " + address.values());
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-//        if (address.containsKey("latitude"))
-            db.collection("users").document(id).collection("children").document(childName).update("updatedDate", new Date(), "apps", apps, "location", address, "calls", calls);
-//        else
-//            db.collection("users").document(id).collection("children").document(childName).update("updatedDate", new Date(), "apps", apps, "calls", calls);
-
+        db.collection("users").document(id).collection("children").document(childName).update("updatedDate", new Date(), "apps", apps, "location", address, "calls", calls);
     }
-
 
 }
