@@ -36,8 +36,7 @@ class BackgroundServices {
       showAlertDialog(context,
           state: AlertState.failed, description: "Try again, ${e.message}");
     }
-    showAlertDialog(context,
-        state: AlertState.success, description: state);
+    showAlertDialog(context, state: AlertState.success, description: state);
   }
 
   static Future getPermissions() async {
@@ -71,5 +70,11 @@ class BackgroundServices {
     } on PlatformException catch (e) {
       print('Failed to retrieve installed apps: ${e.message}');
     }
+  }
+
+  static Future testMethod() async {
+    try {
+      await _channel.invokeMethod('test');
+    } catch (e) {}
   }
 }
