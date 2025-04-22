@@ -9,12 +9,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.os.Bundle;
 import android.view.accessibility.AccessibilityEvent;
 import android.util.Log;
 import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.core.app.NotificationCompat;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -27,7 +30,7 @@ public class ForegroundAppsAccessibilityService extends AccessibilityService {
     @Override
     public void onCreate() {
         super.onCreate();
-        createNotification();
+//        createNotification();
     }
 
     @Override
@@ -38,6 +41,7 @@ public class ForegroundAppsAccessibilityService extends AccessibilityService {
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
+
         if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
             String packageName = event.getPackageName().toString();
             if (getBlockedApps().contains(packageName) || packageName.contains("apps.youtube.music")) {
@@ -46,6 +50,72 @@ public class ForegroundAppsAccessibilityService extends AccessibilityService {
             } else {
                 Log.d(TAG, "Current Foreground App: " + packageName);
             }
+        }
+
+//        urlTracking(event);
+
+    }
+
+    private void urlTracking(AccessibilityEvent event) {
+        AccessibilityNodeInfo source = event.getSource();
+        if (source == null)
+            return;
+        final String packageName = String.valueOf(source.getPackageName());
+        String BROWSER_LIST = "com.android.chrome";
+        List<String> browserList
+                = Arrays.asList(BROWSER_LIST.split(",\\s*"));
+        if (event.getEventType()
+                == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED) {
+            if (!browserList.contains(packageName)) {
+                return;
+            }
+        }
+
+        if (browserList.contains(packageName)) {
+            try {
+                if (AccessibilityEvent
+                        .eventTypeToString(event.getEventType())
+                        .contains("WINDOW")) {
+                    AccessibilityNodeInfo nodeInfo = event.getSource();
+                    getUrlsFromViews(nodeInfo);
+                }
+            } catch (StackOverflowError ex) {
+                ex.printStackTrace();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
+    public void getUrlsFromViews(AccessibilityNodeInfo info) {
+
+        try {
+            if (info == null)
+                return;
+            if (info.getText() != null && info.getText().length() > 0) {
+                String capturedText = info.getText().toString();
+                        Log.e(TAG, "Captured Text : " + capturedText.substring(1, 6));
+
+//                Bundle arguments = new Bundle();
+                if (capturedText.contains("https://")
+                        || capturedText.contains("http://")) {
+
+                    if (capturedText.contains("facebook.com")) {
+                        Log.e(TAG, "Current Blocked URL : " + capturedText);
+                    }
+                }
+            }
+            for (int i = 0; i < info.getChildCount(); i++) {
+                AccessibilityNodeInfo child = info.getChild(i);
+                getUrlsFromViews(child);
+                if (child != null) {
+                    child.recycle();
+                }
+            }
+        } catch (StackOverflowError ex) {
+            ex.printStackTrace();
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
 
@@ -94,7 +164,6 @@ public class ForegroundAppsAccessibilityService extends AccessibilityService {
                 notificationManager.createNotificationChannel(channel);
             }
         }
-
         builder.build();
     }
 }

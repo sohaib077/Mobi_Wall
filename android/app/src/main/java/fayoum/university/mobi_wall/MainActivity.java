@@ -17,6 +17,7 @@ import io.flutter.plugin.common.MethodChannel;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.net.VpnService;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -63,6 +64,8 @@ public class MainActivity extends FlutterActivity {
         NotificationHelper.createNotificationChannel(this);
         stopAppUsageMonitorService();
         stopMyAccessibilityService();
+
+        vpnPermission();
 
         // Open accessibility settings
 //        Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
@@ -225,6 +228,26 @@ public class MainActivity extends FlutterActivity {
         }
     }
 
+    private void vpnPermission() {
+        Intent intent = VpnService.prepare(this);
+        if (intent != null) {
+            startActivityForResult(intent, VPN_REQUEST_CODE);
+        } else {
+            startVpnService();
+        }
+    }
+
+    private void startVpnService() {
+        // Create an intent to start your VPN service
+        Intent intent = new Intent(this, BlockingVpnService.class);
+        System.out.println("starting vpn service");
+        // Start the service (use startForegroundService for Android 8.0+)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(intent);
+        } else {
+            startService(intent);
+        }
+    }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
