@@ -5,6 +5,8 @@ sealed class ParentState {}
 
 final class ParentInitial extends ParentState {}
 
+final class ChangeTabValueState extends ParentState {}
+
 final class AddChildLoadingState extends ParentState {}
 
 final class AddChildSuccessState extends ParentState {}

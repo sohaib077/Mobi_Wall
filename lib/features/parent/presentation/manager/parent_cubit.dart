@@ -8,11 +8,14 @@ import 'package:mobi_wall/core/enums/alert_state_enum.dart';
 import 'package:mobi_wall/core/enums/method_state_enum.dart';
 import 'package:mobi_wall/core/helpers/extensions.dart';
 import 'package:mobi_wall/core/helpers/notification_helper.dart';
-import 'package:mobi_wall/core/services/firebase_services.dart';
-import 'package:mobi_wall/core/utils/constants.dart';
 import 'package:mobi_wall/core/widgets/shared_methods.dart';
 import 'package:mobi_wall/features/parent/data/models/child_data_model.dart';
 import 'package:mobi_wall/features/parent/data/repos/parent_repo.dart';
+
+import '../views/widgets/apps_list.dart';
+import '../views/widgets/calls_list.dart';
+import '../views/widgets/location_details_view.dart';
+import '../views/widgets/url_blocking_view.dart';
 
 part 'parent_state.dart';
 
@@ -22,6 +25,35 @@ class ParentCubit extends Cubit<ParentState> {
   static ParentCubit get(context) => BlocProvider.of(context);
 
   final ParentRepo _parentRepo;
+
+  /// ////////////////////// Bottom Nav //////////////////////////////
+
+  int currentTab = 0;
+
+  void changeTab(int value) {
+    currentTab = value;
+    emit(ChangeTabValueState());
+  }
+
+  // final List<Widget> _bodies = [
+  //   LocationDetailsView(location: currentChild.location),
+  //   const CoursesView(),
+  //   const ArticlesView(),
+  //   const OffersView(),
+  //   const ProfileView()
+  // ];
+
+  Widget getCurrentBody() {
+     final List<Widget> _bodies = [
+      LocationDetailsView(location: currentChild.locationData),
+      AppsList(apps: currentChild.appsData),
+      CallsList(calls: currentChild.calls),
+      UrlBlockingView(urls: currentChild.blockedUrls),
+    ];
+    return _bodies[currentTab];
+  }
+
+  /// ////////////////////// Add Child //////////////////////////////
 
   MethodState addChildState = MethodState.init;
 
