@@ -61,7 +61,7 @@ class FirebaseService {
       await _db
           .collection(_usersCollection)
           .doc(Constants.id!)
-          .update({"token": token});
+          .update({"token": token, "updatedDate": DateTime.now()});
     }
     return token;
   }

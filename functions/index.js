@@ -10,6 +10,7 @@
 const {onRequest} = require("firebase-functions/v2/https");
 const {initializeApp} = require("firebase-admin/app");
 const {getFirestore} = require("firebase-admin/firestore");
+const {getMessaging} = require("firebase-admin/messaging");
 const logger = require("firebase-functions/logger");
 
 // Initialize Firebase Admin SDK
@@ -108,6 +109,9 @@ exports.storeBehaviorAnalysis = onRequest(async (req, res) => {
         .doc();
     await childDocRef.set(analysisData, {merge: true});
 
+    // Send notification if behavior is Bad or Very Bad
+    await sendNotificationIfNeeded(db, parentId, childName, result.Behavior);
+
     logger.info("Successfully stored behavior analysis", {
       documentPath: `users/${parentId}/children/${childName}`,
       parentId: parentId,
@@ -131,6 +135,101 @@ exports.storeBehaviorAnalysis = onRequest(async (req, res) => {
     });
   }
 });
+
+/**
+ * Send notification to parent if child behavior is Bad or Very Bad
+ * @param {FirebaseFirestore.Firestore} db - Firestore database instance
+ * @param {string} parentId - Parent's user ID
+ * @param {string} childName - Child's name
+ * @param {string} behavior - Child's behavior status
+ */
+async function sendNotificationIfNeeded(db, parentId, childName, behavior) {
+  try {
+    // Check if behavior requires notification
+    if (behavior !== "Bad" && behavior !== "Very Bad") {
+      logger.info("No notification needed", {
+        behavior: behavior,
+        childName: childName,
+        structuredData: true,
+      });
+      return;
+    }
+
+    // Get parent's FCM token from Firestore
+    const parentDoc = await db.collection("users").doc(parentId).get();
+
+    if (!parentDoc.exists) {
+      logger.warn("Parent document not found", {
+        parentId: parentId,
+        structuredData: true,
+      });
+      return;
+    }
+
+    const parentData = parentDoc.data();
+    const fcmToken = parentData.token;
+
+    if (!fcmToken) {
+      logger.warn("Parent FCM token not found", {
+        parentId: parentId,
+        structuredData: true,
+      });
+      return;
+    }
+
+    // Prepare notification message
+    const message = {
+      token: fcmToken,
+      notification: {
+        title: "⚠️ Child Behavior Alert",
+        body: `${childName}'s behavior is ${behavior}.`,
+      },
+      data: {
+        type: "behavior_alert",
+        childName: childName,
+        behavior: behavior,
+        parentId: parentId,
+        timestamp: new Date().toISOString(),
+      },
+      android: {
+        notification: {
+          icon: "ic_notification",
+          color: "#FF5722",
+          channelId: "behavior_alerts",
+          priority: "high",
+        },
+      },
+      apns: {
+        payload: {
+          aps: {
+            badge: 1,
+            sound: "default",
+          },
+        },
+      },
+    };
+
+    // Send notification
+    const messaging = getMessaging();
+    const response = await messaging.send(message);
+
+    logger.info("Notification sent successfully", {
+      messageId: response,
+      parentId: parentId,
+      childName: childName,
+      behavior: behavior,
+      structuredData: true,
+    });
+  } catch (error) {
+    logger.error("Error sending notification", {
+      error: error.message,
+      parentId: parentId,
+      childName: childName,
+      behavior: behavior,
+      structuredData: true,
+    });
+  }
+}
 
 // Create and deploy your first functions
 // https://firebase.google.com/docs/functions/get-started
