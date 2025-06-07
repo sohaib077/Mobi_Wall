@@ -34,14 +34,15 @@ import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 
+import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-
 public class MainActivity extends FlutterActivity {
 
     private static final String TAG_SEND_DATA = "Sending data to server";
+    private static final String TAG_AI_PREDICTION = "Sending data to ai";
 
     private static final String CHANNEL = "fayoum.university.mobi_wall";
     public static Activity activity;
@@ -65,7 +66,7 @@ public class MainActivity extends FlutterActivity {
         stopAppUsageMonitorService();
         stopMyAccessibilityService();
 
-        vpnPermission();
+//        vpnPermission();
 
         // Open accessibility settings
 //        Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
@@ -156,12 +157,34 @@ public class MainActivity extends FlutterActivity {
         Data inputData = dataBuilder.build();
 
         PeriodicWorkRequest periodicSendDataWork = new PeriodicWorkRequest.Builder(SendDataWorker.class, 15, TimeUnit.MINUTES).addTag(TAG_SEND_DATA).setConstraints(constraints).setInputData(inputData).setInitialDelay(2, TimeUnit.SECONDS).build();
+//        PeriodicWorkRequest periodicAiPredictionWork = new PeriodicWorkRequest.Builder(AiWorker.class, 1, TimeUnit.DAYS).addTag(TAG_AI_PREDICTION).setConstraints(constraints).setInputData(inputData).setInitialDelay(scheduleDailyInitialDelay(), TimeUnit.MILLISECONDS).build();
+        PeriodicWorkRequest periodicAiPredictionWork = new PeriodicWorkRequest.Builder(AiWorker.class, 15, TimeUnit.MINUTES).addTag(TAG_AI_PREDICTION).setConstraints(constraints).setInputData(inputData).build();
 
         WorkManager workManager = WorkManager.getInstance(this);
         workManager.enqueueUniquePeriodicWork("Refresh Child Data", ExistingPeriodicWorkPolicy.REPLACE, periodicSendDataWork);
+        workManager.enqueueUniquePeriodicWork("Ai Prediction", ExistingPeriodicWorkPolicy.REPLACE, periodicAiPredictionWork);
 
         return true;
     }
+
+
+    private static long scheduleDailyInitialDelay() {
+        // Define the time (12:00 AM)
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+
+        // Calculate the initial delay
+        long currentTime = System.currentTimeMillis();
+        long scheduledTime = calendar.getTimeInMillis();
+        long initialDelay = scheduledTime - currentTime;
+        if (initialDelay < 0) {
+            initialDelay += TimeUnit.DAYS.toMillis(1); // If the time has already passed today, schedule for tomorrow
+        }
+        return initialDelay;
+    }
+
 
 ////////////////////////////////////////// CHANNEL METHODS ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -213,6 +236,8 @@ public class MainActivity extends FlutterActivity {
                 stopMyAccessibilityService();
                 result.success("Periodic data refreshing is cancelled successfully");
 
+            }  else if (call.method.equals("test")){
+                AiWorker.callEndpoint(this,call.argument("id"),call.argument("childName"));
             } else {
                 result.notImplemented();
             }
@@ -227,6 +252,15 @@ public class MainActivity extends FlutterActivity {
             System.out.println("Accessibility service is already enabled");
         }
     }
+
+//        private void openAccessibilitySettings() {
+//        if (!new ForegroundAppsAccessibilityService().isAccessibilityServiceEnabled(this)) {
+//            Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+//            startActivity(intent);
+//        } else {
+//            System.out.println("Accessibility service is already enabled");
+//        }
+//    }
 
     private void vpnPermission() {
         Intent intent = VpnService.prepare(this);
@@ -269,7 +303,7 @@ public class MainActivity extends FlutterActivity {
         } catch (ExecutionException | InterruptedException ignored) {
         }
 
-        boolean state;
+
         isChild = Boolean.TRUE.equals(call.argument("isChild"));
         id = call.argument("id");
         childName = call.argument("childName");
@@ -281,7 +315,7 @@ public class MainActivity extends FlutterActivity {
         editor.putString("childId", id).apply();
         editor.putBoolean("isChild", isChild).apply();
 
-        state = SettingUpPeriodicWork();
+        boolean state = SettingUpPeriodicWork();
         System.out.println("state = " + state);
         if (state) result.success("Periodic data refreshing is started successfully");
         else

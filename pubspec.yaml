@@ -105,6 +105,9 @@ dependencies:
   # Getting Location details from latitude and longitude
   geocode: ^1.0.3
 
+  # Icons
+  flutter_iconly: ^1.0.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

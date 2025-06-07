@@ -18,12 +18,9 @@ class LocationDetailsView extends StatefulWidget {
   const LocationDetailsView({
     super.key,
     required this.location,
-    this.address,
   });
 
   final LocationDataModel? location;
-
-  final Address? address;
 
   @override
   State<LocationDetailsView> createState() => _LocationDetailsViewState();
@@ -36,8 +33,7 @@ class _LocationDetailsViewState extends State<LocationDetailsView> {
   @override
   void initState() {
     super.initState();
-    flag =
-        widget.address == null || widget.address!.city!.contains("Throttled");
+    flag = address == null || address!.city!.contains("Throttled");
     if (flag && widget.location != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         getAddress();
@@ -63,9 +59,7 @@ class _LocationDetailsViewState extends State<LocationDetailsView> {
                   SizedBox(height: 20.h),
                   CustomAddressTextFormField(
                     controller: TextEditingController(
-                        text: flag
-                            ? (address == null ? "loading..." : address!.city)
-                            : widget.address?.city),
+                        text: (address == null ? "loading..." : address!.city)),
                     hintText: " ",
                     enabled: false,
                     label: "CITY",
@@ -73,11 +67,10 @@ class _LocationDetailsViewState extends State<LocationDetailsView> {
                   SizedBox(height: 30.h),
                   CustomAddressTextFormField(
                     controller: TextEditingController(
-                        text: flag
-                            ? (address == null
-                                ? "loading..."
-                                : address!.streetAddress)
-                            : widget.address?.streetAddress),
+                      text: (address == null
+                          ? "loading..."
+                          : address!.streetAddress),
+                    ),
                     hintText: " ",
                     enabled: false,
                     label: "STREET",
