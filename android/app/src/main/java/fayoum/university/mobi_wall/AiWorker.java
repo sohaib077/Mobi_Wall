@@ -19,6 +19,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
@@ -86,12 +87,12 @@ public class AiWorker extends Worker {
         System.out.println("Sending Data To AI Model...");
 
 
-        callEndpoint(context);
+        callEndpoint(context, id, childName);
 
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public static void callEndpoint(Context context) {
+    public static void callEndpoint(Context context, String id, String childName) {
         /* Getting apps details  */
         List<Map<String, Object>> apps = new InstalledAppsProvider(context).getInstalledApps();
         JSONObject appUsageData = new JSONObject();
@@ -133,15 +134,93 @@ public class AiWorker extends Worker {
                     while ((inputLine = in.readLine()) != null) {
                         response.append(inputLine);
                     }
-                    in.close();
-
-                    Log.d(TAG, "Response: " + response);
+                    in.close();                    Log.d(TAG, "Response: " + response);
+                    
+                    // Parse the AI response and send to Firebase Cloud Function
+                    try {
+                        JSONObject aiResult = new JSONObject(response.toString());
+                        Log.d(TAG, "Parsed AI result successfully, sending to Firebase...");
+                        sendBehaviorAnalysis(aiResult, id, childName);
+                    } catch (JSONException e) {
+                        Log.e(TAG, "Error parsing AI response JSON: " + e.getMessage());
+                        Log.e(TAG, "Raw AI response was: " + response.toString());
+                    }
 
                 } else {
                     Log.e(TAG, "Error sending data to Ai: " + responseCode);
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Send Data to Ai: " + e);
+                e.printStackTrace();
+            }
+        }).start();
+    }
+    public static void sendBehaviorAnalysis(JSONObject aiResult, String id, String childName) {
+        new Thread(() -> {
+            try {
+                // Create the JSON request body
+                JSONObject requestBody = new JSONObject();
+                requestBody.put("parentId", id);
+                requestBody.put("childName", childName);
+                requestBody.put("result", aiResult); // Now passing JSONObject directly
+
+                // Create the URL object
+                URL url = new URL("https://storebehavioranalysis-c2afovzl3a-uc.a.run.app");
+
+                // Open a connection
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+                try {
+                    // Set up the connection
+                    connection.setRequestMethod("POST");
+                    connection.setRequestProperty("Content-Type", "application/json");
+                    connection.setDoOutput(true);
+
+                    // Convert to string for logging
+                    String requestBodyString = requestBody.toString();
+                    System.out.println("Full Request Body:\n" + requestBodyString);
+
+                    // Write the request body
+                    try (OutputStream os = connection.getOutputStream()) {
+                        byte[] input = requestBodyString.getBytes("utf-8");
+                        os.write(input, 0, input.length);
+                    }// Get the response code
+                    int responseCode = connection.getResponseCode();
+                    String responseMessage = connection.getResponseMessage();
+
+                    if (responseCode == HttpURLConnection.HTTP_OK) {
+                        // Success - read and log success response
+                        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                        StringBuilder successResponse = new StringBuilder();
+                        String inputLine;
+                        while ((inputLine = in.readLine()) != null) {
+                            successResponse.append(inputLine);
+                        }
+                        in.close();
+                        System.out.println("Request successful - Response: " + successResponse.toString());
+                    } else {
+                        // Error handling - read the actual error message
+                        StringBuilder errorResponse = new StringBuilder();
+                        try {
+                            BufferedReader errorReader = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
+                            String errorLine;
+                            while ((errorLine = errorReader.readLine()) != null) {
+                                errorResponse.append(errorLine);
+                            }
+                            errorReader.close();
+                        } catch (Exception e) {
+                            System.out.println("Could not read error response: " + e.getMessage());
+                        }
+                        
+                        System.out.println("Request FAILED:");
+                        System.out.println("- Response Code: " + responseCode);
+                        System.out.println("- Response Message: " + responseMessage);
+                        System.out.println("- Error Body: " + errorResponse.toString());
+                    }                } finally {
+                    connection.disconnect();
+                }
+            } catch (Exception e) {
+                System.out.println("Exception in sendBehaviorAnalysis: " + e.getMessage());
                 e.printStackTrace();
             }
         }).start();

@@ -237,7 +237,7 @@ public class MainActivity extends FlutterActivity {
                 result.success("Periodic data refreshing is cancelled successfully");
 
             }  else if (call.method.equals("test")){
-                AiWorker.callEndpoint(this);
+                AiWorker.callEndpoint(this,call.argument("id"),call.argument("childName"));
             } else {
                 result.notImplemented();
             }

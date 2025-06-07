@@ -56,6 +56,7 @@ exports.storeBehaviorAnalysis = onRequest(async (req, res) => {
   try {
     const {parentId, childName, result} = req.body;
 
+    console.log("Received request body:", req.body);
     // Validate input data
     if (!parentId || !childName || !result) {
       res.status(400).json({
@@ -83,8 +84,6 @@ exports.storeBehaviorAnalysis = onRequest(async (req, res) => {
 
     // Create the document data with timestamp
     const analysisData = {
-      parentId: parentId,
-      childName: childName,
       behavior: result.Behavior,
       appUsage: {
         music: result.Music || 0,

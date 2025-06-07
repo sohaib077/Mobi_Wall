@@ -74,7 +74,10 @@ class BackgroundServices {
 
   static Future testMethod() async {
     try {
-      await _channel.invokeMethod('test');
+      await _channel.invokeMethod('test', {
+        "id": Constants.id,
+        "childName": Constants.childData?.username,
+      });
     } catch (e) {}
   }
 }
