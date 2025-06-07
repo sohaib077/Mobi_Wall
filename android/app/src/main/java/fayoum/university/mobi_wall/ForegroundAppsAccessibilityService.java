@@ -2,6 +2,7 @@ package fayoum.university.mobi_wall;
 
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -10,6 +11,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.accessibility.AccessibilityEvent;
 import android.util.Log;
 import android.view.accessibility.AccessibilityManager;
@@ -26,11 +28,12 @@ public class ForegroundAppsAccessibilityService extends AccessibilityService {
 
     private static final String TAG = "ForegroundAppService";
     private static final String CHANNEL_ID = "accessibility_service_channel";
+    private static final int NOTIFICATION_ID = 6789;
 
     @Override
     public void onCreate() {
         super.onCreate();
-//        createNotification();
+        startForeground(NOTIFICATION_ID, createNotification());
     }
 
     @Override
@@ -38,6 +41,12 @@ public class ForegroundAppsAccessibilityService extends AccessibilityService {
         super.onServiceConnected();
         Log.d(TAG, "AccessibilityService connected");
     }
+
+//    @Override
+//    public int onStartCommand(Intent intent, int flags, int startId) {
+//        startForeground(NOTIFICATION_ID, createNotification());
+//        return super.onStartCommand(intent, flags, startId);
+//    }
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
@@ -94,7 +103,7 @@ public class ForegroundAppsAccessibilityService extends AccessibilityService {
                 return;
             if (info.getText() != null && info.getText().length() > 0) {
                 String capturedText = info.getText().toString();
-                        Log.e(TAG, "Captured Text : " + capturedText.substring(1, 6));
+                Log.e(TAG, "Captured Text : " + capturedText.substring(1, 6));
 
 //                Bundle arguments = new Bundle();
                 if (capturedText.contains("https://")
@@ -147,7 +156,19 @@ public class ForegroundAppsAccessibilityService extends AccessibilityService {
         return false;
     }
 
-    private void createNotification() {
+//    public boolean isAccessibilityServiceEnabled(Context context) {
+//        String service = context.getPackageName() + "/.ForegroundAppsAccessibilityService";
+//        int enabled = Settings.Secure.getInt(getContentResolver(),
+//                Settings.Secure.ACCESSIBILITY_ENABLED, 0);
+//        if (enabled == 1) {
+//            String enabledServices = Settings.Secure.getString(getContentResolver(),
+//                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
+//            return enabledServices != null && enabledServices.contains(service);
+//        }
+//        return false;
+//    }
+
+    private Notification createNotification() {
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
 
@@ -164,6 +185,6 @@ public class ForegroundAppsAccessibilityService extends AccessibilityService {
                 notificationManager.createNotificationChannel(channel);
             }
         }
-        builder.build();
+      return  builder.build();
     }
 }

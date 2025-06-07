@@ -224,6 +224,7 @@ class _ChildrenViewState extends State<ChildrenView> {
       onPressed: () {
         Navigator.pop(context);
         BackgroundServices.stopPeriodicTasks(context);
+        // BackgroundServices.testMethod();
       },
       text: "Stop",
       color: Colors.red,
