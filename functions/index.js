@@ -230,6 +230,84 @@ async function sendNotificationIfNeeded(db, parentId, childName, behavior) {
   }
 }
 
+/**
+ * HTTP endpoint to store smartwatch data in Firestore
+ * POST /storeSmartwatchData
+ * Body: {
+ *   parentId: string,
+ *   childName: string,
+ *   location: {
+ *     latitude: number,
+ *     longitude: number
+ *   },
+ *   heartRate: number
+ * }
+ */
+exports.storeSmartwatchData = onRequest(async (req, res) => {
+  // Set CORS headers
+  res.set("Access-Control-Allow-Origin", "*");
+  res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.set("Access-Control-Allow-Headers", "Content-Type");
+
+  // Handle preflight OPTIONS request
+  if (req.method === "OPTIONS") {
+    res.status(204).send("");
+    return;
+  }
+
+  // Only allow POST requests
+  if (req.method !== "POST") {
+    res.status(405).json({error: "Method not allowed"});
+    return;
+  }
+
+  try {
+    const {parentId, childName, location, heartRate} = req.body;
+
+    console.log("Received request body:", req.body);
+    // Validate input data
+    if (!parentId || !childName || !location || !heartRate) {
+      res.status(400).json({
+        error:
+          "Missing parentId, childName, location, and heartRate",
+      });
+      return;
+    }
+
+    const db = getFirestore();
+
+    // Create the document data with timestamp
+    const smartwatchData = {
+      location,
+      heartRate,
+      createdAt: new Date(),
+    };
+
+    // Store in Firestore under users/{parentId}/children/{childName}
+    const childDocRef = db
+        .collection("users")
+        .doc(parentId)
+        .collection("children")
+        .doc(childName);
+    await childDocRef.set({smartwatchData}, {merge: true});
+
+    res.status(200).json({
+      success: true,
+      documentPath: `users/${parentId}/children/${childName}/smartwatch`,
+      message: "Smartwatch data stored successfully",
+    });
+  } catch (error) {
+    logger.error("Error storing smartwatch data", {
+      error: error.message,
+      structuredData: true,
+    });
+
+    res.status(500).json({
+      error: `Failed to store smartwatch data: ${error.message}`,
+    });
+  }
+});
+
 // Create and deploy your first functions
 // https://firebase.google.com/docs/functions/get-started
 
