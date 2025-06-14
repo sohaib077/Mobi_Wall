@@ -291,6 +291,9 @@ exports.storeSmartwatchData = onRequest(async (req, res) => {
         .doc(childName);
     await childDocRef.set({smartwatchData}, {merge: true});
 
+    // Send notification if heart rate is outside normal range (50-100 BPM)
+    await sendHeartRateNotificationIfNeeded(db, parentId, childName, heartRate);
+
     res.status(200).json({
       success: true,
       documentPath: `users/${parentId}/children/${childName}/smartwatch`,
@@ -307,6 +310,109 @@ exports.storeSmartwatchData = onRequest(async (req, res) => {
     });
   }
 });
+
+/**
+ * Send notification to parent if child's heart rate is outside normal range
+ * @param {FirebaseFirestore.Firestore} db - Firestore database instance
+ * @param {string} parentId - Parent's user ID
+ * @param {string} childName - Child's name
+ * @param {number} heartRate - Child's heart rate
+ */
+async function sendHeartRateNotificationIfNeeded(
+    db, parentId, childName, heartRate) {
+  try {
+    // Check if heart rate is outside normal range (50-100 BPM)
+    if (heartRate >= 50 && heartRate <= 100) {
+      logger.info("Heart rate is normal, no notification needed", {
+        heartRate: heartRate,
+        childName: childName,
+        structuredData: true,
+      });
+      return;
+    }
+
+    // Get parent's FCM token from Firestore
+    const parentDoc = await db.collection("users").doc(parentId).get();
+
+    if (!parentDoc.exists) {
+      logger.warn("Parent document not found", {
+        parentId: parentId,
+        structuredData: true,
+      });
+      return;
+    }
+
+    const parentData = parentDoc.data();
+    const fcmToken = parentData.token;
+
+    if (!fcmToken) {
+      logger.warn("Parent FCM token not found", {
+        parentId: parentId,
+        structuredData: true,
+      });
+      return;
+    }
+
+    // Determine alert type and message
+    const isHigh = heartRate > 100;
+    const alertType = isHigh ? "High" : "Low";
+    const emoji = isHigh ? "🔴" : "🔵";
+
+    // Prepare notification message
+    const message = {
+      token: fcmToken,
+      notification: {
+        title: `${emoji} Heart Rate Alert`,
+        body: `${childName}'s heart rate is ${alertType}: ${heartRate} BPM`,
+      },
+      data: {
+        type: "heart_rate_alert",
+        childName: childName,
+        heartRate: heartRate.toString(),
+        alertType: alertType,
+        parentId: parentId,
+        timestamp: new Date().toISOString(),
+      },
+      android: {
+        notification: {
+          icon: "ic_notification",
+          color: isHigh ? "#FF5722" : "#2196F3",
+          channelId: "health_alerts",
+          priority: "high",
+        },
+      },
+      apns: {
+        payload: {
+          aps: {
+            badge: 1,
+            sound: "default",
+          },
+        },
+      },
+    };
+
+    // Send notification
+    const messaging = getMessaging();
+    const response = await messaging.send(message);
+
+    logger.info("Heart rate notification sent successfully", {
+      messageId: response,
+      parentId: parentId,
+      childName: childName,
+      heartRate: heartRate,
+      alertType: alertType,
+      structuredData: true,
+    });
+  } catch (error) {
+    logger.error("Error sending heart rate notification", {
+      error: error.message,
+      parentId: parentId,
+      childName: childName,
+      heartRate: heartRate,
+      structuredData: true,
+    });
+  }
+}
 
 // Create and deploy your first functions
 // https://firebase.google.com/docs/functions/get-started
