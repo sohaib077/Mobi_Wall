@@ -414,6 +414,143 @@ async function sendHeartRateNotificationIfNeeded(
   }
 }
 
+/**
+ * HTTP endpoint to send emergency notification to parent
+ * POST /sendEmergencyAlert
+ * Body: {
+ *   parentId: string,
+ *   childName: string
+ * }
+ */
+exports.sendEmergencyAlert = onRequest(async (req, res) => {
+  // Set CORS headers
+  res.set("Access-Control-Allow-Origin", "*");
+  res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.set("Access-Control-Allow-Headers", "Content-Type");
+
+  // Handle preflight OPTIONS request
+  if (req.method === "OPTIONS") {
+    res.status(204).send("");
+    return;
+  }
+
+  // Only allow POST requests
+  if (req.method !== "POST") {
+    res.status(405).json({error: "Method not allowed"});
+    return;
+  }
+
+  try {
+    const {parentId, childName} = req.body;
+
+    console.log("Received emergency alert request:", req.body);
+    // Validate input data
+    if (!parentId || !childName) {
+      res.status(400).json({
+        error: "Missing required fields: parentId and childName",
+      });
+      return;
+    }
+
+    const db = getFirestore();
+
+    logger.info("Sending emergency alert", {
+      parentId: parentId,
+      childName: childName,
+      structuredData: true,
+    });
+
+    // Get parent's FCM token from Firestore
+    const parentDoc = await db.collection("users").doc(parentId).get();
+
+    if (!parentDoc.exists) {
+      logger.warn("Parent document not found for emergency alert", {
+        parentId: parentId,
+        structuredData: true,
+      });
+      res.status(404).json({
+        error: "Parent not found",
+      });
+      return;
+    }
+
+    const parentData = parentDoc.data();
+    const fcmToken = parentData.token;
+
+    if (!fcmToken) {
+      logger.warn("Parent FCM token not found for emergency alert", {
+        parentId: parentId,
+        structuredData: true,
+      });
+      res.status(400).json({
+        error: "Parent notification token not found",
+      });
+      return;
+    }
+
+    // Prepare emergency notification message
+    const message = {
+      token: fcmToken,
+      notification: {
+        title: "🚨 EMERGENCY ALERT",
+        body: `${childName} is in an EMERGENCY situation!`,
+      },
+      data: {
+        type: "emergency_alert",
+        childName: childName,
+        parentId: parentId,
+        timestamp: new Date().toISOString(),
+        priority: "critical",
+      },
+      android: {
+        notification: {
+          icon: "ic_notification",
+          color: "#FF0000",
+          channelId: "emergency_alerts",
+          priority: "max",
+          sound: "default",
+          tag: "emergency",
+        },
+      },
+      apns: {
+        payload: {
+          aps: {
+            badge: 1,
+            sound: "default",
+          },
+        },
+      },
+    };
+
+    // Send notification
+    const messaging = getMessaging();
+    const response = await messaging.send(message);
+
+    logger.info("Emergency notification sent successfully", {
+      messageId: response,
+      parentId: parentId,
+      childName: childName,
+      structuredData: true,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Emergency alert sent successfully",
+      messageId: response,
+    });
+  } catch (error) {
+    logger.error("Error sending emergency alert", {
+      error: error.message,
+      structuredData: true,
+    });
+
+    res.status(500).json({
+      error: `Failed to send emergency alert: ${error.message}`,
+    });
+  }
+});
+
+
 // Create and deploy your first functions
 // https://firebase.google.com/docs/functions/get-started
 
