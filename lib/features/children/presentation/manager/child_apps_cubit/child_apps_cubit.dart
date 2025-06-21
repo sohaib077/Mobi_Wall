@@ -3,8 +3,8 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 // import 'package:geolocator/geolocator.dart';
-import 'package:installed_apps/app_info.dart';
-import 'package:installed_apps/installed_apps.dart';
+// import 'package:installed_apps/app_info.dart';
+// import 'package:installed_apps/installed_apps.dart';
 import 'package:meta/meta.dart';
 import 'package:mobi_wall/core/enums/method_state_enum.dart';
 import 'package:mobi_wall/core/errors/error_model.dart';
@@ -36,7 +36,7 @@ class ChildAppsCubit extends Cubit<ChildAppsState> {
       Map<String, Duration> monthlyUsageMap = {};
       Map<String, DateTime> lastOpenedMap = {};
 
-      List<AppInfo> appsInfo = await InstalledApps.getInstalledApps(true, true);
+      // List<AppInfo> appsInfo = await InstalledApps.getInstalledApps(true, true);
 
       // appsInfo.forEach(
       //   (app) {

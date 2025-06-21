@@ -20,7 +20,7 @@ class UserDataModel {
       id: json['id'],
       name: json['name'],
       email: json['email'],
-      password: json['password'],
+      password: json['password'] ?? " ",
       phone: json['phone'],
       token: json['token'],
     );
