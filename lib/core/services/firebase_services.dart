@@ -14,10 +14,8 @@ class FirebaseService {
   Future<void> signOut() => _auth.signOut();
 
   /// ///////////////////////     COLLECTION NAMES      ///////////////////////////////
-
   static const String _usersCollection = "users";
   static const String _childrenCollection = "children";
-  static const String _appsCollection = "apps";
 
   /// ///////////////////////     AUTH      ///////////////////////////////
   Future<UserCredential> registerUser({
@@ -168,5 +166,20 @@ class FirebaseService {
         .collection(_childrenCollection)
         .doc(childUsername)
         .update({'blockedUrls': blockedUrls});
+  }
+
+  /// ///////////////////////     BEHAVIOR ANALYSIS      ///////////////////////////////
+
+  Future<QuerySnapshot<Map<String, dynamic>>> getBehaviorAnalysis({
+    required String childUsername,
+  }) async {
+    return await _db
+        .collection(_usersCollection)
+        .doc(Constants.id)
+        .collection(_childrenCollection)
+        .doc(childUsername)
+        .collection('behaviorAnalysis')
+        .orderBy('createdAt', descending: true)
+        .get();
   }
 }

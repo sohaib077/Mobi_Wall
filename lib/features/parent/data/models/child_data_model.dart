@@ -1,13 +1,13 @@
 import 'package:mobi_wall/features/children/data/models/app_data_model.dart';
 import 'package:mobi_wall/features/children/data/models/calls_model.dart';
 import 'package:mobi_wall/features/children/data/models/location_data_model.dart';
+import 'package:mobi_wall/features/children/data/models/smartwatch_data_model.dart';
 
 class ChildDataModel {
   String username;
   String password;
   DateTime? createdDate;
   DateTime? updatedDate;
-
   List<AppDataModel>? appsData;
   LocationDataModel? locationData;
 
@@ -15,9 +15,8 @@ class ChildDataModel {
 
   List<String>? blockedApps;
   List<String>? blockedUrls;
-
   List<CallsModel>? calls;
-
+  SmartwatchDataModel? smartwatchData;
   ChildDataModel({
     required this.username,
     required this.password,
@@ -29,12 +28,13 @@ class ChildDataModel {
     this.blockedApps,
     this.blockedUrls,
     this.calls,
+    this.smartwatchData,
   });
 
   factory ChildDataModel.fromJson(Map<String, dynamic> json) {
     return ChildDataModel(
-      username: json['username'],
-      password: json['password'],
+      username: json['username'] ?? 'none',
+      password: json['password'] ?? 'none',
       token: json['token'],
       blockedApps: json['blockedApps'] == null
           ? []
@@ -55,6 +55,9 @@ class ChildDataModel {
       calls: json["calls"] == null
           ? null
           : (json["calls"] as List).map((e) => CallsModel.fromJson(e)).toList(),
+      smartwatchData: json["smartwatchData"] == null
+          ? null
+          : SmartwatchDataModel.fromJson(json["smartwatchData"]),
     );
   }
 

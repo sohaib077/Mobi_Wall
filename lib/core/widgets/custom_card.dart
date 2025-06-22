@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mobi_wall/core/helpers/extensions.dart';
-import 'package:mobi_wall/core/utils/constants.dart';
 
 import '../utils/app_colors.dart';
 

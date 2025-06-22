@@ -6,7 +6,6 @@ import 'package:mobi_wall/core/widgets/custom_nav_bar/custom_bottom_navigation_b
 import 'package:mobi_wall/core/widgets/custom_title_app_bar.dart';
 import 'package:mobi_wall/features/parent/data/models/child_data_model.dart';
 import 'package:mobi_wall/features/parent/presentation/manager/parent_cubit.dart';
-import 'package:mobi_wall/features/parent/presentation/views/widgets/block_url_floating_action_button.dart';
 
 class ChildDetailsView extends StatelessWidget {
   const ChildDetailsView({super.key, required this.child});
@@ -22,8 +21,8 @@ class ChildDetailsView extends StatelessWidget {
           final currentPage = ParentCubit.get(context).currentTab;
           return Scaffold(
             appBar: AppBar(),
-            floatingActionButton:
-                currentPage == 3 ? const BlockUrlFloatingActionButton() : null,
+            // floatingActionButton:
+            //     currentPage == 4 ? const BlockUrlFloatingActionButton() : null,
             bottomNavigationBar: const CustomBottomNavigationBar(),
             body: Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.w),

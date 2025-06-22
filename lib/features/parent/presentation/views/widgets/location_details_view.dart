@@ -4,14 +4,12 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:geocode/geocode.dart';
 import 'package:lottie/lottie.dart';
-import 'package:mobi_wall/core/enums/alert_state_enum.dart';
+import 'package:mobi_wall/core/functions/show_location.dart';
 import 'package:mobi_wall/core/utils/assets_data.dart';
 import 'package:mobi_wall/core/utils/size_config.dart';
 import 'package:mobi_wall/core/widgets/custom_address_text_form_field.dart';
 import 'package:mobi_wall/core/widgets/custom_animated_button.dart';
 import 'package:mobi_wall/core/widgets/custom_empty_state_widget.dart';
-import 'package:mobi_wall/core/widgets/shared_methods.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:mobi_wall/features/children/data/models/location_data_model.dart';
 
 class LocationDetailsView extends StatefulWidget {
@@ -27,14 +25,18 @@ class LocationDetailsView extends StatefulWidget {
 }
 
 class _LocationDetailsViewState extends State<LocationDetailsView> {
-  Address? address;
+  static Address? address;
+  static LocationDataModel? location;
   late bool flag;
 
   @override
   void initState() {
     super.initState();
-    flag = address == null || address!.city!.contains("Throttled");
+    flag = address == null ||
+        address!.city!.contains("Throttled") ||
+        location != widget.location;
     if (flag && widget.location != null) {
+      location = widget.location;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         getAddress();
       });
@@ -105,19 +107,7 @@ class _LocationDetailsViewState extends State<LocationDetailsView> {
                   CustomAnimatedButton(
                     text: "Show Location",
                     onPressed: () async {
-                      String latitude = widget.location!.latitude.toString();
-                      String longitude = widget.location!.longitude.toString();
-                      try {
-                        final Uri link = Uri.parse(
-                          "https://www.google.com/maps?q=$latitude,$longitude",
-                        );
-                        await launchUrl(link);
-                      } catch (e) {
-                        log(e.toString());
-                        showAlertDialog(context,
-                            state: AlertState.failed,
-                            description: "\nOops, something wrong\n");
-                      }
+                      await showLocation(context, widget.location!);
                     },
                   ),
                   SizedBox(height: 50.h),

@@ -9,15 +9,20 @@ class LocationDataModel {
 
   factory LocationDataModel.fromJson(Map<String, dynamic> json) {
     return LocationDataModel(
-      latitude: json['latitude'] ?? 0,
-      longitude: json['longitude'] ?? 0,
+      latitude: (json['latitude'] ?? 0).toDouble(),
+      longitude: (json['longitude'] ?? 0).toDouble(),
     );
   }
 
-  Map<String, dynamic>  toMap() {
+  Map<String, dynamic> toMap() {
     return {
       'latitude': latitude,
       'longitude': longitude,
     };
+  }
+
+  @override
+  String toString() {
+    return 'LocationDataModel(latitude: $latitude, longitude: $longitude)';
   }
 }
