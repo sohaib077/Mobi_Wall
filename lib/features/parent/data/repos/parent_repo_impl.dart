@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:mobi_wall/features/children/data/models/behavior_analysis_model.dart';
 import 'package:mobi_wall/features/parent/data/models/child_data_model.dart';
 
 import 'parent_repo.dart';
@@ -89,6 +90,29 @@ class ParentRepoImpl implements ParentRepo {
           blockedUrls: blockedUrls, childUsername: childUsername);
       return const Right(null);
     } on Exception catch (e) {
+      return left(ErrorHandler.handle(e));
+    }
+  }
+
+  @override
+  Future<Either<ErrorModel, List<BehaviorAnalysisModel>>> getBehaviorAnalysis(
+      {required String childUsername}) async {
+    try {
+      final result =
+          await _fb.getBehaviorAnalysis(childUsername: childUsername);
+
+      List<BehaviorAnalysisModel> behaviorAnalysisList = [];
+      for (var doc in result.docs) {
+        try {
+          behaviorAnalysisList.add(BehaviorAnalysisModel.fromJson(doc.data()));
+        } catch (e) {
+          log("Error parsing behavior analysis data: $e");
+        }
+      }
+
+      return Right(behaviorAnalysisList);
+    } on Exception catch (e) {
+      log("Error while getting behavior analysis: $e");
       return left(ErrorHandler.handle(e));
     }
   }

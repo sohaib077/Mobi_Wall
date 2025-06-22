@@ -15,7 +15,6 @@ class ChildDataModel {
 
   List<String>? blockedApps;
   List<String>? blockedUrls;
-
   List<CallsModel>? calls;
   SmartwatchDataModel? smartwatchData;
   ChildDataModel({

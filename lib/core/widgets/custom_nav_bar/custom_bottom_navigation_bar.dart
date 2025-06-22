@@ -71,6 +71,12 @@ class CustomBottomNavigationBar extends StatelessWidget {
                         tapName: "Smart Watch",
                         index: 3,
                       ),
+                      BottomNavigationBarTabItem(
+                        iconData: IconlyBroken.chart,
+                        selectedIconData: IconlyBold.chart,
+                        tapName: "Behavior",
+                        index: 4,
+                      ),
                       // BottomNavigationBarTabItem(
                       //   iconData: IconlyBroken.hide,
                       //   selectedIconData: IconlyBold.hide,
@@ -83,7 +89,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
               ),
               BottomNavigationTabAnimatedContainer(
                 currentTabIndex: ParentCubit.get(context).currentTab,
-                tabsCount: 4,
+                tabsCount: 5,
               ),
             ],
           ),

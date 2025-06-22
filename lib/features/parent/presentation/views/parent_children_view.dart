@@ -43,38 +43,45 @@ class _ParentChildrenViewState extends State<ParentChildrenView> {
       floatingActionButton: const AddChildFloatingActionButton(),
       body: BlocProvider.value(
         value: sl<ParentCubit>()..getChildren(),
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(
-              parent: AlwaysScrollableScrollPhysics()),
-          padding: EdgeInsets.symmetric(horizontal: 16.w),
-          child: BlocConsumer<ParentCubit, ParentState>(
-            listener: (context, state) => _listener(context, state),
-            builder: (context, state) {
-              List<ChildDataModel> children = ParentCubit.get(context).children;
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CustomTitleAppBar(
-                    title: "Children",
-                    onBack: () {
-                      CacheHelper.removeData(Constants.cachedIsParent);
-                      navigateAndFinish(context, const HomeView(), x: -1, y: 0);
-                    },
-                    onRefresh: () {
-                      ParentCubit.get(context).getChildren();
-                    },
-                  ),
-                  SizedBox(height: 20.h),
-                  CustomStateWidget(
-                    state: ParentCubit.get(context).getChildrenState,
-                    widget: ParentChildrenList(children: children),
-                    onError: () => ParentCubit.get(context).getChildren(),
-                    emptyWidget: const CustomEmptyStateWidget(),
-                  ),
-                  SizedBox(height: 50.h),
-                ],
-              );
-            },
+        child: RefreshIndicator(
+          onRefresh: () async {
+            sl<ParentCubit>().getChildren(refresh: true);
+          },
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(
+                parent: AlwaysScrollableScrollPhysics()),
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
+            child: BlocConsumer<ParentCubit, ParentState>(
+              listener: (context, state) => _listener(context, state),
+              builder: (context, state) {
+                List<ChildDataModel> children =
+                    ParentCubit.get(context).children;
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CustomTitleAppBar(
+                      title: "Children",
+                      onBack: () {
+                        CacheHelper.removeData(Constants.cachedIsParent);
+                        navigateAndFinish(context, const HomeView(),
+                            x: -1, y: 0);
+                      },
+                      onRefresh: () {
+                        ParentCubit.get(context).getChildren();
+                      },
+                    ),
+                    SizedBox(height: 20.h),
+                    CustomStateWidget(
+                      state: ParentCubit.get(context).getChildrenState,
+                      widget: ParentChildrenList(children: children),
+                      onError: () => ParentCubit.get(context).getChildren(),
+                      emptyWidget: const CustomEmptyStateWidget(),
+                    ),
+                    SizedBox(height: 50.h),
+                  ],
+                );
+              },
+            ),
           ),
         ),
       ),

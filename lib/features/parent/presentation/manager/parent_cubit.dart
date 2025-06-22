@@ -9,14 +9,15 @@ import 'package:mobi_wall/core/enums/method_state_enum.dart';
 import 'package:mobi_wall/core/helpers/extensions.dart';
 import 'package:mobi_wall/core/helpers/notification_helper.dart';
 import 'package:mobi_wall/core/widgets/shared_methods.dart';
+import 'package:mobi_wall/features/children/data/models/behavior_analysis_model.dart';
 import 'package:mobi_wall/features/parent/data/models/child_data_model.dart';
 import 'package:mobi_wall/features/parent/data/repos/parent_repo.dart';
 
 import '../views/widgets/apps_list.dart';
+import '../views/widgets/behavior_analysis_view.dart';
 import '../views/widgets/calls_list.dart';
 import '../views/widgets/location_details_view.dart';
 import '../views/widgets/smart_watch_view.dart';
-import '../views/widgets/url_blocking_view.dart';
 
 part 'parent_state.dart';
 
@@ -31,11 +32,18 @@ class ParentCubit extends Cubit<ParentState> {
 
   int currentTab = 0;
 
+  // Behavior analysis state
+  List<BehaviorAnalysisModel> behaviorAnalysisList = [];
+  MethodState getBehaviorAnalysisState = MethodState.init;
+
   void changeTab(int value) {
     currentTab = value;
+    // Load behavior analysis when navigating to behavior tab
+    if (value == 4 && behaviorAnalysisList.isEmpty) {
+      getBehaviorAnalysis();
+    }
     emit(ChangeTabValueState());
   }
-
   // final List<Widget> _bodies = [
   //   LocationDetailsView(location: currentChild.location),
   //   const CoursesView(),
@@ -49,8 +57,10 @@ class ParentCubit extends Cubit<ParentState> {
       LocationDetailsView(location: currentChild.locationData),
       AppsList(apps: currentChild.appsData),
       CallsList(calls: currentChild.calls),
-      // UrlBlockingView(urls: currentChild.blockedUrls),
       SmartWatchView(smartwatchData: currentChild.smartwatchData),
+      BehaviorAnalysisView(
+          behaviorAnalysisList:
+              behaviorAnalysisList.isNotEmpty ? behaviorAnalysisList : null),
     ];
     return _bodies[currentTab];
   }
@@ -92,8 +102,8 @@ class ParentCubit extends Cubit<ParentState> {
 
   List<ChildDataModel> children = [];
 
-  Future<void> getChildren() async {
-    if (getChildrenState.isLoading()) return;
+  Future<void> getChildren({bool refresh = false}) async {
+    if (!refresh && getChildrenState.isLoading()) return;
     getChildrenState = MethodState.loading;
     emit(GetChildrenLoadingState());
 
@@ -134,8 +144,12 @@ class ParentCubit extends Cubit<ParentState> {
   }
 
   late ChildDataModel currentChild;
-
   void changeCurrentChildData(ChildDataModel child) {
+    try {
+      if (child.username == currentChild.username) return;
+    } catch (e) {
+      log("Error changing current child data: $e");
+    }
     currentChild = child;
 
     blockedApps.clear();
@@ -146,7 +160,38 @@ class ParentCubit extends Cubit<ParentState> {
 
     showSaveButton = false;
     isBlockedAppsChanged = false;
+
+    // Clear behavior analysis when switching child
+    behaviorAnalysisList.clear();
+    getBehaviorAnalysisState = MethodState.init;
+
     emit(ChangeCurrentChildState());
+  }
+
+  /// ////////////////////// Behavior Analysis //////////////////////////////
+
+  Future<void> getBehaviorAnalysis() async {
+    if (getBehaviorAnalysisState.isLoading()) return;
+    getBehaviorAnalysisState = MethodState.loading;
+    emit(GetBehaviorAnalysisLoadingState());
+
+    final result = await _parentRepo.getBehaviorAnalysis(
+      childUsername: currentChild.username,
+    );
+
+    result.fold(
+      (error) {
+        getBehaviorAnalysisState = MethodState.failed;
+        emit(GetBehaviorAnalysisFailureState(error.getErrorsMessage()));
+      },
+      (behaviorData) {
+        behaviorAnalysisList = behaviorData;
+        getBehaviorAnalysisState =
+            behaviorData.isNotEmpty ? MethodState.success : MethodState.empty;
+        log("Behavior analysis data: ${behaviorAnalysisList.length}");
+        emit(GetBehaviorAnalysisSuccessState());
+      },
+    );
   }
 
   /// ////////////////////// Blocking apps //////////////////////////////

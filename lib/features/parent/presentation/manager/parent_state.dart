@@ -66,3 +66,13 @@ final class UpdateBlockedUrlsFailureState extends ParentState {
 
   UpdateBlockedUrlsFailureState(this.message);
 }
+
+final class GetBehaviorAnalysisLoadingState extends ParentState {}
+
+final class GetBehaviorAnalysisSuccessState extends ParentState {}
+
+final class GetBehaviorAnalysisFailureState extends ParentState {
+  final String message;
+
+  GetBehaviorAnalysisFailureState(this.message);
+}
