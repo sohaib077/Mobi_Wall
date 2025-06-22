@@ -15,6 +15,7 @@ import 'package:mobi_wall/features/parent/data/repos/parent_repo.dart';
 import '../views/widgets/apps_list.dart';
 import '../views/widgets/calls_list.dart';
 import '../views/widgets/location_details_view.dart';
+import '../views/widgets/smart_watch_view.dart';
 import '../views/widgets/url_blocking_view.dart';
 
 part 'parent_state.dart';
@@ -44,11 +45,12 @@ class ParentCubit extends Cubit<ParentState> {
   // ];
 
   Widget getCurrentBody() {
-     final List<Widget> _bodies = [
+    final List<Widget> _bodies = [
       LocationDetailsView(location: currentChild.locationData),
       AppsList(apps: currentChild.appsData),
       CallsList(calls: currentChild.calls),
-      UrlBlockingView(urls: currentChild.blockedUrls),
+      // UrlBlockingView(urls: currentChild.blockedUrls),
+      SmartWatchView(smartwatchData: currentChild.smartwatchData),
     ];
     return _bodies[currentTab];
   }

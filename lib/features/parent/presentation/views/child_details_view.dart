@@ -23,7 +23,7 @@ class ChildDetailsView extends StatelessWidget {
           return Scaffold(
             appBar: AppBar(),
             floatingActionButton:
-                currentPage == 3 ? const BlockUrlFloatingActionButton() : null,
+                currentPage == 4 ? const BlockUrlFloatingActionButton() : null,
             bottomNavigationBar: const CustomBottomNavigationBar(),
             body: Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.w),
