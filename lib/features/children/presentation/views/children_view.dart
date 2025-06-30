@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mobi_wall/core/enums/method_state_enum.dart';
+import 'package:mobi_wall/core/functions/premissions_request.dart';
 import 'package:mobi_wall/core/functions/setup_service_locator.dart';
 import 'package:mobi_wall/core/helpers/cache_helper.dart';
 import 'package:mobi_wall/core/services/firebase_services.dart';
@@ -34,8 +35,7 @@ class _ChildrenViewState extends State<ChildrenView> {
         _showInfoDialog(context);
       });
     } else {
-      BackgroundServices.getPermissions();
-      BackgroundServices.getUsageAccessAndAdminActivation();
+      _requestPermissionsSequentially();
     }
 
     FirebaseService().updateChildToken().then((value) {
@@ -43,8 +43,16 @@ class _ChildrenViewState extends State<ChildrenView> {
     }).catchError((error) {
       log("Error while updating child token : $error");
     });
+  }
 
-    // BackgroundServices.getPermissions();
+  Future<void> _requestPermissionsSequentially() async {
+    try {
+      // Request permissions sequentially to avoid conflicts
+      await BackgroundServices.getPermissions();
+      await BackgroundServices.getUsageAccessAndAdminActivation();
+    } catch (e) {
+      log("Error during permission requests: $e");
+    }
   }
 
   void _refreshData(BuildContext context) {
@@ -84,11 +92,12 @@ class _ChildrenViewState extends State<ChildrenView> {
                   ),
                   const Spacer(),
                   _buildItem(context,
-                      state: refreshAppsState, text: "Refreshing Apps Data"),
+                      state: refreshAppsState,
+                      text: "Syncing with smart watch"),
                   SizedBox(height: 20.h),
-                  _buildItem(context,
-                      state: refreshLocationState,
-                      text: "Refreshing Current Location"),
+                  // _buildItem(context,
+                  //     state: refreshLocationState,
+                  //     text: "Refreshing Current Location"),
                   const Spacer(flex: 2),
                   Padding(
                     padding: EdgeInsets.symmetric(
@@ -206,8 +215,8 @@ class _ChildrenViewState extends State<ChildrenView> {
     );
   }
 
-  _showPeriodicRefreshingDialog(BuildContext context) {
-    // set up the button
+  _showPeriodicRefreshingDialog(BuildContext context) async {
+    await requestLocationPermissions(); // set up the button
     Widget startButton = Expanded(
         child: CustomElevatedButton(
       onPressed: () {

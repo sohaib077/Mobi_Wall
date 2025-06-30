@@ -1,12 +1,11 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lottie/lottie.dart';
+import 'package:mobi_wall/core/functions/premissions_request.dart';
 import 'package:mobi_wall/core/functions/setup_service_locator.dart';
 import 'package:mobi_wall/core/utils/assets_data.dart';
 import 'package:mobi_wall/core/helpers/extensions.dart';
-import 'package:mobi_wall/core/utils/background_services.dart';
 import 'package:mobi_wall/core/utils/icon_broken.dart';
 import 'package:mobi_wall/core/utils/size_config.dart';
 import 'package:mobi_wall/core/utils/styles.dart';
@@ -15,7 +14,6 @@ import 'package:mobi_wall/core/widgets/custom_elevated_button.dart';
 import 'package:mobi_wall/core/widgets/custom_text_form_field.dart';
 import 'package:mobi_wall/core/widgets/shared_methods.dart';
 import 'package:mobi_wall/core/widgets/unfocus.dart';
-import '../../../../core/functions/unfocus.dart';
 import '../manager/children_cubit/children_cubit.dart';
 import 'children_view.dart';
 
@@ -35,11 +33,16 @@ class _ChildrenLoginViewState extends State<ChildrenLoginView> {
 
   bool isObscureText = true;
   bool autoValidate = false;
-
   @override
   void initState() {
     super.initState();
-    BackgroundServices.getPermissions();
+    _requestPermissions();
+  }
+
+  Future<void> _requestPermissions() async {
+    await requestCallLogsPermission();
+    // await requestLocationPermissions();
+    // await requestCallsAndPermissions();
   }
 
   @override

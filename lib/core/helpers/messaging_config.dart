@@ -1,6 +1,6 @@
-import 'dart:convert';
 import 'dart:developer';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class MessagingConfig {
@@ -35,9 +35,8 @@ class MessagingConfig {
       provisional: false,
       sound: true,
     );
-
     const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+        AndroidInitializationSettings('@drawable/ic_notification');
 
     const DarwinInitializationSettings initializationSettingsIOS =
         DarwinInitializationSettings(
@@ -73,7 +72,6 @@ class MessagingConfig {
       log("message received");
       try {
         RemoteNotification? notification = event.notification;
-        AndroidNotification? android = event.notification?.android;
         log(notification!.body.toString());
         log(notification.title.toString());
 
@@ -90,7 +88,8 @@ class MessagingConfig {
               channelDescription:
                   'This channel is used for important notifications.',
               sound: RawResourceAndroidNotificationSound('custom_sound'),
-              icon: '@mipmap/ic_launcher',
+              icon: '@drawable/ic_notification',
+              color: const Color(0xff0079FB),
             ),
             iOS: const DarwinNotificationDetails(
               presentAlert: true,

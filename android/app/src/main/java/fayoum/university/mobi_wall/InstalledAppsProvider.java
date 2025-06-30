@@ -86,6 +86,16 @@ public class InstalledAppsProvider {
         return installedApps;
     }
 
+    public List<Map<String, Object>> getDummyInstalledApps(){
+        List<Map<String, Object>> dummyApps = new ArrayList<>();
+
+        for (AppDataModel appData : AppDataModel.getDummyAppDataList()) {
+            dummyApps.add(appData.toMap());
+        }
+
+        return dummyApps;
+    }
+
 }
 
 

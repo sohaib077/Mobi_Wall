@@ -81,13 +81,12 @@ public class LocationTrackingService extends Service {
                 notificationManager.createNotificationChannel(channel);
             }
         }
-    }
-
-    private Notification createNotification() {
+    }    private Notification createNotification() {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle("Location Tracking")
                 .setContentText("Tracking user location")
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(R.drawable.ic_notification)
+                .setColor(getResources().getColor(R.color.primary_color))
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
         return builder.build();

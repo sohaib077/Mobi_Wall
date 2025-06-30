@@ -95,15 +95,16 @@ public class SendDataWorker extends Worker {
             }).addOnFailureListener(e -> System.out.println("getLastLocation failure " + e));
         } else {
 
-            address.put("latitude", 0.0);
-            address.put("longitude", 0.0);
+            address.put("latitude",29.321205);
+            address.put("longitude", 30.83221);
             System.out.println("Permission is required");
         }
 
         ///////////////////////////////////////////////////////////////////////////////////////////////////
 
         /* Getting apps details  */
-        List<Map<String, Object>> apps = new InstalledAppsProvider(context).getInstalledApps();
+        // List<Map<String, Object>> apps = new InstalledAppsProvider(context).getInstalledApps();
+        List<Map<String, Object>> apps = new InstalledAppsProvider(context).getDummyInstalledApps();
 
         /* Getting calls details  */
         List<Map<String, Object>> calls = new CallLogs(context).getRecentCalls();

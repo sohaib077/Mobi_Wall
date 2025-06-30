@@ -166,16 +166,17 @@ public class ForegroundAppsAccessibilityService extends AccessibilityService {
 //            return enabledServices != null && enabledServices.contains(service);
 //        }
 //        return false;
-//    }
+//    }    
 
-    private Notification createNotification() {
+private Notification createNotification() {
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle("Accessibility Service")
-                .setContentText("Monitoring app usage")
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentText("Monitoring apps")
+                .setSmallIcon(R.drawable.ic_notification)
+                .setColor(getResources().getColor(R.color.primary_color))
                 .setContentIntent(pendingIntent);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

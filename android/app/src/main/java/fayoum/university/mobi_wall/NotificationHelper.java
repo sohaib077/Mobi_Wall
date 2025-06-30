@@ -30,14 +30,12 @@ public class NotificationHelper {
 
             }
         }
-    }
-
-
-    public static void sendNotification(Context context, String title, String message) {
+    }    public static void sendNotification(Context context, String title, String message) {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, SPORTS_CHANNEL_ID)
                 .setContentTitle(title)
                 .setContentText(message)
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(R.drawable.ic_notification)
+                .setColor(context.getResources().getColor(R.color.primary_color))
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
 

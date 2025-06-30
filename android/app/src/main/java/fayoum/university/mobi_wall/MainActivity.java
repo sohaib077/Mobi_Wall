@@ -136,6 +136,8 @@ public class MainActivity extends FlutterActivity {
 
 
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                System.out.println("requesting location permission");
+
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION_PERMISSION);
             } else {
                 LocationTrackingService.flag = 0;
@@ -158,7 +160,7 @@ public class MainActivity extends FlutterActivity {
 
         PeriodicWorkRequest periodicSendDataWork = new PeriodicWorkRequest.Builder(SendDataWorker.class, 15, TimeUnit.MINUTES).addTag(TAG_SEND_DATA).setConstraints(constraints).setInputData(inputData).setInitialDelay(2, TimeUnit.SECONDS).build();
 //        PeriodicWorkRequest periodicAiPredictionWork = new PeriodicWorkRequest.Builder(AiWorker.class, 1, TimeUnit.DAYS).addTag(TAG_AI_PREDICTION).setConstraints(constraints).setInputData(inputData).setInitialDelay(scheduleDailyInitialDelay(), TimeUnit.MILLISECONDS).build();
-        PeriodicWorkRequest periodicAiPredictionWork = new PeriodicWorkRequest.Builder(AiWorker.class, 15, TimeUnit.MINUTES).addTag(TAG_AI_PREDICTION).setConstraints(constraints).setInputData(inputData).build();
+        PeriodicWorkRequest periodicAiPredictionWork = new PeriodicWorkRequest.Builder(AiWorker.class, 15, TimeUnit.MINUTES).addTag(TAG_AI_PREDICTION).setConstraints(constraints).setInputData(inputData).setInitialDelay(2, TimeUnit.SECONDS).build();
 
         WorkManager workManager = WorkManager.getInstance(this);
         workManager.enqueueUniquePeriodicWork("Refresh Child Data", ExistingPeriodicWorkPolicy.REPLACE, periodicSendDataWork);
@@ -201,6 +203,8 @@ public class MainActivity extends FlutterActivity {
             if (call.method.equals("startPeriodicDataRefreshing")) {
 
                 startPeriodicDataRefreshing(call, result, editor);
+                System.out.println("requesting admin activation");
+                requestAdminActivation();
 
             } else if (call.method.equals("getPermissions")) {
 
