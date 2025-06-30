@@ -179,7 +179,7 @@ class FirebaseService {
         .collection(_childrenCollection)
         .doc(childUsername)
         .collection('behaviorAnalysis')
-        .orderBy('createdAt', descending: true)
+        .orderBy('created_at', descending: true)
         .get();
   }
 }

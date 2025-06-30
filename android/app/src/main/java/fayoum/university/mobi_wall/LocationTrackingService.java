@@ -130,11 +130,11 @@ public class LocationTrackingService extends Service {
                                 @Override
                                 public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                                     if (task.isSuccessful()) {
-                                        DocumentSnapshot document = task.getResult();
+                                        DocumentSnapshot document = task.getResult();                                       
                                         if (document.exists() && document.getData().get("token") != null) {
                                             editor.putString("token", document.getData().get("token").toString());
                                             System.out.println("parent token = " + document.getData().get("token"));
-                                            new NotificationSender(getApplicationContext(), document.getData().get("token").toString()).startThread();
+                                            new NotificationSender(getApplicationContext(), document.getData().get("token").toString()).sendNotificationAsync();
                                         } else {
                                             System.out.println("No such document");
                                         }

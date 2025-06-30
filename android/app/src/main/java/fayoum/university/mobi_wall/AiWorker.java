@@ -94,7 +94,7 @@ public class AiWorker extends Worker {
     @RequiresApi(api = Build.VERSION_CODES.N)
     public static void callEndpoint(Context context, String id, String childName) {
         /* Getting apps details  */
-        List<Map<String, Object>> apps = new InstalledAppsProvider(context).getInstalledApps();
+        List<Map<String, Object>> apps = new InstalledAppsProvider(context).getDummyInstalledApps();
         JSONObject appUsageData = new JSONObject();
         for (Map<String, Object> app : apps) {
             try {
@@ -134,7 +134,8 @@ public class AiWorker extends Worker {
                     while ((inputLine = in.readLine()) != null) {
                         response.append(inputLine);
                     }
-                    in.close();                    Log.d(TAG, "Response: " + response);
+                    in.close();                    
+                    Log.d(TAG, "Response: " + response);
                     
                     // Parse the AI response and send to Firebase Cloud Function
                     try {

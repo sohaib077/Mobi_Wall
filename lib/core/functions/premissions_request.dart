@@ -43,7 +43,7 @@ Future<void> requestLocationPermissions() async {
     log("Requesting fine location permission...");
 
     // First check current status without requesting
-    PermissionStatus locationStatus = await Permission.location.request();
+    PermissionStatus locationStatus = await Permission.locationAlways.request();
     log("Fine location permission status: ${locationStatus.toString()}");
     // If not granted, then request
     if (!locationStatus.isGranted) {
@@ -64,13 +64,13 @@ Future<void> requestLocationPermissions() async {
     log("Fine location permission granted");
 
     // Check when in use status without requesting first
-    PermissionStatus locationAlwaysStatus = await Permission.locationAlways.status;
+    // PermissionStatus locationAlwaysStatus = await Permission.locationAlways.status;
 
-    // // Only request if not already granted
-    if (!locationAlwaysStatus.isGranted) {
-      locationAlwaysStatus = await Permission.locationAlways.request();
-      log("Location when in use permission status: ${locationAlwaysStatus.toString()}");
-    }
+    // // // Only request if not already granted
+    // if (!locationAlwaysStatus.isGranted) {
+    //   locationAlwaysStatus = await Permission.locationAlways.request();
+    //   log("Location when in use permission status: ${locationAlwaysStatus.toString()}");
+    // }
   } catch (e) {
     log("Error requesting location permissions: $e");
   }

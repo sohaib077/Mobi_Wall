@@ -298,22 +298,42 @@ exports.storeBehaviorAnalysis = onRequest(async (req, res) => {
         structuredData: true,
       });
 
-      const db = getFirestore();
+      const db = getFirestore(); // Create the document data with timestamp
+      // Dynamically extract all app usage data and percentages
+      const appUsage = {};
+      const percentages = {};
 
-      // Create the document data with timestamp
+      // Process all properties in result except Behavior and Percentages
+      Object.keys(result).forEach((key) => {
+        if (
+          key !== "Behavior" &&
+          key !== "Percentages" &&
+          typeof result[key] === "number"
+        ) {
+          // Convert key to camelCase for consistency
+          // const camelCaseKey = key
+          //   .toLowerCase()
+          // .replace(/\s+(.)/g, (match, group1) => group1.toUpperCase());
+          appUsage[key] = result[key] || 0;
+        }
+      });
+
+      // Process all percentages
+      if (result.Percentages && typeof result.Percentages === "object") {
+        Object.keys(result.Percentages).forEach((key) => {
+          // Convert key to camelCase for consistency
+          const camelCaseKey = key
+              .toLowerCase()
+              .replace(/\s+(.)/g, (match, group1) => group1.toUpperCase());
+          percentages[camelCaseKey] = result.Percentages[key] || 0;
+        });
+      }
+
       const analysisData = {
         behavior: result.Behavior,
-        appUsage: {
-          music: result.Music || 0,
-          other: result.Other || 0,
-          socialMedia: result["Social Media"] || 0,
-        },
-        percentages: {
-          music: result.Percentages.Music || 0,
-          other: result.Percentages.Other || 0,
-          socialMedia: result.Percentages["Social Media"] || 0,
-        },
-        createdAt: new Date(),
+        appUsage: appUsage,
+        percentages: percentages,
+        created_at: new Date(),
       };
 
       // Store in Firestore under users/{parentId}/children/{childName}

@@ -145,11 +145,6 @@ class ParentCubit extends Cubit<ParentState> {
 
   late ChildDataModel currentChild;
   void changeCurrentChildData(ChildDataModel child) {
-    try {
-      if (child.username == currentChild.username) return;
-    } catch (e) {
-      log("Error changing current child data: $e");
-    }
     currentChild = child;
 
     blockedApps.clear();

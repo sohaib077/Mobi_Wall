@@ -24,7 +24,7 @@ class BehaviorAnalysisModel {
           (key, value) => MapEntry(key, (value as num).toDouble()),
         ),
       ),
-      createdAt: json['createdAt']?.toDate() ?? DateTime.now(),
+      createdAt: json['created_at']?.toDate() ?? DateTime.now(),
     );
   }
 
@@ -33,7 +33,7 @@ class BehaviorAnalysisModel {
       'behavior': behavior,
       'appUsage': appUsage,
       'percentages': percentages,
-      'createdAt': createdAt,
+      'created_at': createdAt,
     };
   }
 
